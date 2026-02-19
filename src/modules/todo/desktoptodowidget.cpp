@@ -12,7 +12,9 @@ DesktopTodoWidget::DesktopTodoWidget(QWidget *parent)
     : QWidget(parent)
     , m_mainLayout(nullptr)
     , m_headerWidget(nullptr)
+    , m_titleWidget(nullptr)
     , m_dateLabel(nullptr)
+    , m_clearCompletedBtn(nullptr)
     , m_taskInput(nullptr)
     , m_addBtn(nullptr)
     , m_scrollArea(nullptr)
@@ -46,13 +48,32 @@ void DesktopTodoWidget::setupUi()
     m_mainLayout->setContentsMargins(10, 10, 10, 10);
     m_mainLayout->setSpacing(10);
     
-    m_dateLabel = new QLabel(this);
+    m_titleWidget = new QWidget(this);
+    m_titleWidget->setAttribute(Qt::WA_TranslucentBackground);
+    QHBoxLayout *titleLayout = new QHBoxLayout(m_titleWidget);
+    titleLayout->setContentsMargins(0, 0, 0, 0);
+    titleLayout->setSpacing(5);
+    
+    m_dateLabel = new QLabel(m_titleWidget);
     m_dateLabel->setAlignment(Qt::AlignCenter);
-    m_dateLabel->setStyleSheet("font-size: 16px; font-weight: bold; color: #2c3e50; padding: 5px;");
     updateDateLabel();
-    m_mainLayout->addWidget(m_dateLabel);
+    titleLayout->addWidget(m_dateLabel, 1);
+    
+    m_clearCompletedBtn = new QPushButton("清理", m_titleWidget);
+    m_clearCompletedBtn->setFixedHeight(26);
+    m_clearCompletedBtn->setToolTip("点击清理已完成待办");
+    m_clearCompletedBtn->setStyleSheet(
+        "QPushButton { background-color: #e74c3c; color: white; border: none; border-radius: 5px; "
+        "font-size: 12px; padding: 2px 10px; }"
+        "QPushButton:hover { background-color: #c0392b; }"
+        "QPushButton:pressed { background-color: #a93226; }"
+    );
+    titleLayout->addWidget(m_clearCompletedBtn);
+    
+    m_mainLayout->addWidget(m_titleWidget);
     
     m_headerWidget = new QWidget(this);
+    m_headerWidget->setAttribute(Qt::WA_TranslucentBackground);
     QHBoxLayout *headerLayout = new QHBoxLayout(m_headerWidget);
     headerLayout->setContentsMargins(0, 0, 0, 0);
     headerLayout->setSpacing(8);
@@ -76,8 +97,11 @@ void DesktopTodoWidget::setupUi()
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    m_scrollArea->setAttribute(Qt::WA_TranslucentBackground);
+    m_scrollArea->viewport()->setAttribute(Qt::WA_TranslucentBackground);
     
     m_taskContainer = new QWidget();
+    m_taskContainer->setAttribute(Qt::WA_TranslucentBackground);
     m_taskLayout = new QVBoxLayout(m_taskContainer);
     m_taskLayout->setContentsMargins(5, 5, 5, 5);
     m_taskLayout->setSpacing(5);
@@ -94,6 +118,7 @@ void DesktopTodoWidget::setupUi()
 void DesktopTodoWidget::setupConnections()
 {
     connect(m_addBtn, &QPushButton::clicked, this, &DesktopTodoWidget::onAddButtonClicked);
+    connect(m_clearCompletedBtn, &QPushButton::clicked, this, &DesktopTodoWidget::onClearCompletedClicked);
     connect(m_taskInput, &QLineEdit::returnPressed, this, &DesktopTodoWidget::onAddButtonClicked);
     
     TaskManager *tm = TaskManager::instance();
@@ -127,6 +152,13 @@ void DesktopTodoWidget::setBackgroundColor(const QColor &color)
 void DesktopTodoWidget::setBackgroundOpacity(int opacity)
 {
     m_backgroundOpacity = opacity;
+    
+    if (opacity == 0) {
+        setAttribute(Qt::WA_TranslucentBackground, true);
+    } else {
+        setAttribute(Qt::WA_TranslucentBackground, false);
+    }
+    
     update();
 }
 
@@ -151,7 +183,12 @@ void DesktopTodoWidget::applyWindowFlags()
     }
     
     setWindowFlags(flags);
-    setAttribute(Qt::WA_TranslucentBackground, false);
+    
+    if (m_backgroundOpacity == 0) {
+        setAttribute(Qt::WA_TranslucentBackground, true);
+    } else {
+        setAttribute(Qt::WA_TranslucentBackground, false);
+    }
 }
 
 void DesktopTodoWidget::applyStyleSheet()
@@ -163,15 +200,15 @@ void DesktopTodoWidget::applyStyleSheet()
         fontStr = QString("font-family: '%1';").arg(m_contentFont.family());
     }
     
-    QString style = QString(
-        "QLineEdit { padding: 8px; border: 1px solid #ddd; border-radius: 5px; background: rgba(255,255,255,200); %1 font-size: 13px; }"
-        "QLineEdit:focus { border-color: #9b59b6; }"
-        "QScrollArea { border: 1px solid #ddd; border-radius: 5px; background: rgba(255,255,255,180); }"
-        "QScrollBar:vertical { width: 8px; background: rgba(236,240,241,200); }"
-        "QScrollBar::handle:vertical { background: #bdc3c7; border-radius: 4px; min-height: 20px; }"
-        "QScrollBar::handle:vertical:hover { background: #95a5a6; }"
-        "QLabel { %1 }"
-    ).arg(fontStr);
+    setStyleSheet(QString(
+        "DesktopTodoWidget { background: transparent; }"
+        "QLabel { background: transparent; %1 }"
+        "QWidget { background: transparent; }"
+    ).arg(fontStr));
+    
+    m_dateLabel->setStyleSheet(QString(
+        "QLabel { background: transparent; font-size: 16px; font-weight: bold; color: #2c3e50; padding: 5px; %1 }"
+    ).arg(fontStr));
     
     m_taskInput->setStyleSheet(QString(
         "QLineEdit { padding: 8px; border: 1px solid #ddd; border-radius: 5px; background: rgba(255,255,255,200); %1 font-size: 13px; }"
@@ -179,13 +216,15 @@ void DesktopTodoWidget::applyStyleSheet()
     ).arg(fontStr));
     
     m_scrollArea->setStyleSheet(QString(
-        "QScrollArea { border: 1px solid #ddd; border-radius: 5px; background: rgba(255,255,255,180); }"
+        "QScrollArea { background: transparent; border: 1px solid #ddd; border-radius: 5px; }"
         "QScrollBar:vertical { width: 8px; background: rgba(236,240,241,200); }"
         "QScrollBar::handle:vertical { background: #bdc3c7; border-radius: 4px; min-height: 20px; }"
         "QScrollBar::handle:vertical:hover { background: #95a5a6; }"
-    ).arg(fontStr));
+    ));
     
-    m_countLabel->setStyleSheet(QString("color: #7f8c8d; font-size: 12px; %1").arg(fontStr));
+    m_taskContainer->setStyleSheet("QWidget { background: transparent; }");
+    
+    m_countLabel->setStyleSheet(QString("background: transparent; color: #7f8c8d; font-size: 12px; %1").arg(fontStr));
 }
 
 void DesktopTodoWidget::updateDateLabel()
@@ -223,6 +262,7 @@ void DesktopTodoWidget::clearAllTasks()
 void DesktopTodoWidget::addTaskItem(const TaskData &task)
 {
     TaskItemWidget *widget = new TaskItemWidget(task, this);
+    widget->setAttribute(Qt::WA_TranslucentBackground);
     if (!m_contentFont.family().isEmpty()) {
         widget->setFont(m_contentFont);
     }
@@ -264,6 +304,11 @@ void DesktopTodoWidget::onAddButtonClicked()
     LogManager::instance()->logCreate(text);
     
     m_taskInput->clear();
+}
+
+void DesktopTodoWidget::onClearCompletedClicked()
+{
+    TaskManager::instance()->clearCompletedTasks();
 }
 
 void DesktopTodoWidget::onTaskCompletedChanged(int taskId, bool completed)
@@ -317,15 +362,15 @@ void DesktopTodoWidget::onTaskEditRequested(int taskId, const QString &newText)
 
 void DesktopTodoWidget::paintEvent(QPaintEvent *event)
 {
-    Q_UNUSED(event);
-    
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-    
-    QColor bgColor = m_backgroundColor;
-    bgColor.setAlpha(m_backgroundOpacity);
-    
-    painter.fillRect(rect(), bgColor);
+    if (m_backgroundOpacity > 0) {
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        
+        QColor bgColor = m_backgroundColor;
+        bgColor.setAlpha(m_backgroundOpacity);
+        
+        painter.fillRect(rect(), bgColor);
+    }
     
     QWidget::paintEvent(event);
 }

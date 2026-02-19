@@ -30,6 +30,10 @@ public:
     void loadLogs();
     void saveLogs();
 
+signals:
+    void logAdded();
+    void logsCleared();
+
 private:
     explicit LogManager(QObject *parent = nullptr);
     ~LogManager();

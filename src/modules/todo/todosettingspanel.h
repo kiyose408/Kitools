@@ -32,6 +32,7 @@ private slots:
     void onClearCompletedClicked();
     void onExportJsonClicked();
     void onExportCsvClicked();
+    void onClearLogsClicked();
     void onBackClicked();
     void onBackgroundColorClicked();
     void onBackgroundOpacityChanged(int value);
@@ -50,8 +51,10 @@ private:
     QPushButton *m_clearCompletedBtn;
     QPushButton *m_exportJsonBtn;
     QPushButton *m_exportCsvBtn;
+    QPushButton *m_clearLogsBtn;
     QPushButton *m_backBtn;
     QLabel *m_statsLabel;
+    QLabel *m_logCountLabel;
     
     QPushButton *m_bgColorBtn;
     QSlider *m_bgOpacitySlider;

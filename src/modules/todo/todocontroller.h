@@ -24,6 +24,7 @@ private:
 
     TodoSettingsPanel *m_settingsPanel;
     DesktopTodoWidget *m_todoWidget;
+    bool m_firstShow;
 };
 
 #endif

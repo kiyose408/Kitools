@@ -47,7 +47,7 @@ void LogManager::logComplete(const QString &taskDescription)
 
 void LogManager::logRate(const QString &taskDescription, int score)
 {
-    LogEntry entry("评分", taskDescription, score);
+    LogEntry entry("完成度/自评", taskDescription, score);
     addLog(entry);
 }
 
@@ -67,6 +67,7 @@ void LogManager::clearLogs()
 {
     m_logs.clear();
     saveLogs();
+    emit logsCleared();
 }
 
 bool LogManager::exportToJson(const QString &filePath)
@@ -98,7 +99,7 @@ bool LogManager::exportToCsv(const QString &filePath)
     QTextStream out(&file);
     out.setEncoding(QStringConverter::Utf8);
     
-    out << "时间,操作,任务描述,评分\n";
+    out << "时间,操作,任务描述,完成度/自评\n";
     
     for (const LogEntry &entry : m_logs) {
         QString line = QString("%1,%2,%3,%4\n")
@@ -198,6 +199,7 @@ void LogManager::addLog(const LogEntry &entry)
 {
     m_logs.append(entry);
     saveLogs();
+    emit logAdded();
 }
 
 QString LogManager::logsFilePath() const

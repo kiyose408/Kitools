@@ -86,8 +86,8 @@ void TaskItemWidget::setupUi()
     layout->addWidget(m_deleteBtn);
     
     setStyleSheet(
-        "TaskItemWidget { background-color: #ffffff; border-radius: 5px; margin: 2px; }"
-        "TaskItemWidget:hover { background-color: #f8f9fa; }"
+        "TaskItemWidget { background-color: rgba(255,255,255,180); border-radius: 5px; margin: 2px; }"
+        "TaskItemWidget:hover { background-color: rgba(248,249,250,220); }"
     );
 }
 

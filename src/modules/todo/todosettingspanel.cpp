@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QFontDatabase>
+#include <QMessageBox>
 
 TodoSettingsPanel::TodoSettingsPanel(QWidget *parent)
     : QWidget(parent)
@@ -19,8 +20,10 @@ TodoSettingsPanel::TodoSettingsPanel(QWidget *parent)
     , m_clearCompletedBtn(nullptr)
     , m_exportJsonBtn(nullptr)
     , m_exportCsvBtn(nullptr)
+    , m_clearLogsBtn(nullptr)
     , m_backBtn(nullptr)
     , m_statsLabel(nullptr)
+    , m_logCountLabel(nullptr)
     , m_bgColorBtn(nullptr)
     , m_bgOpacitySlider(nullptr)
     , m_bgOpacityLabel(nullptr)
@@ -130,6 +133,11 @@ void TodoSettingsPanel::setupUi()
     m_statsLabel = new QLabel("共 0 项任务，已完成 0 项", this);
     m_statsLabel->setStyleSheet("font-size: 14px; color: #2c3e50;");
     statsLayout->addWidget(m_statsLabel);
+    
+    m_logCountLabel = new QLabel("日志记录: 0 条", this);
+    m_logCountLabel->setStyleSheet("font-size: 14px; color: #7f8c8d;");
+    statsLayout->addWidget(m_logCountLabel);
+    
     mainLayout->addWidget(statsGroup);
     
     QGroupBox *actionGroup = new QGroupBox("操作", this);
@@ -164,6 +172,14 @@ void TodoSettingsPanel::setupUi()
     exportLayout->addStretch();
     actionLayout->addLayout(exportLayout);
     
+    m_clearLogsBtn = new QPushButton("重置日志", this);
+    m_clearLogsBtn->setStyleSheet(
+        "QPushButton { background-color: #e67e22; color: white; border: none; padding: 8px 15px; "
+        "font-size: 13px; border-radius: 5px; }"
+        "QPushButton:hover { background-color: #d35400; }"
+    );
+    actionLayout->addWidget(m_clearLogsBtn);
+    
     mainLayout->addWidget(actionGroup);
     mainLayout->addStretch();
 }
@@ -176,10 +192,21 @@ void TodoSettingsPanel::setupConnections()
     connect(m_clearCompletedBtn, &QPushButton::clicked, this, &TodoSettingsPanel::onClearCompletedClicked);
     connect(m_exportJsonBtn, &QPushButton::clicked, this, &TodoSettingsPanel::onExportJsonClicked);
     connect(m_exportCsvBtn, &QPushButton::clicked, this, &TodoSettingsPanel::onExportCsvClicked);
+    connect(m_clearLogsBtn, &QPushButton::clicked, this, &TodoSettingsPanel::onClearLogsClicked);
     connect(m_backBtn, &QPushButton::clicked, this, &TodoSettingsPanel::onBackClicked);
     connect(m_bgColorBtn, &QPushButton::clicked, this, &TodoSettingsPanel::onBackgroundColorClicked);
     connect(m_bgOpacitySlider, &QSlider::valueChanged, this, &TodoSettingsPanel::onBackgroundOpacityChanged);
     connect(m_fontCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TodoSettingsPanel::onFontChanged);
+    
+    LogManager *lm = LogManager::instance();
+    connect(lm, &LogManager::logAdded, this, &TodoSettingsPanel::updateStats);
+    connect(lm, &LogManager::logsCleared, this, &TodoSettingsPanel::updateStats);
+    
+    TaskManager *tm = TaskManager::instance();
+    connect(tm, &TaskManager::taskAdded, this, [this](const TaskData &) { updateStats(); });
+    connect(tm, &TaskManager::taskRemoved, this, [this](int) { updateStats(); });
+    connect(tm, &TaskManager::taskCompleted, this, [this](int, bool) { updateStats(); });
+    connect(tm, &TaskManager::tasksCleared, this, [this]() { updateStats(); });
 }
 
 void TodoSettingsPanel::setTodoWidget(DesktopTodoWidget *widget)
@@ -194,6 +221,10 @@ void TodoSettingsPanel::updateStats()
     int total = tm->taskCount();
     int completed = tm->completedCount();
     m_statsLabel->setText(QString("共 %1 项任务，已完成 %2 项").arg(total).arg(completed));
+    
+    LogManager *lm = LogManager::instance();
+    int logCount = lm->logCount();
+    m_logCountLabel->setText(QString("日志记录: %1 条").arg(logCount));
 }
 
 void TodoSettingsPanel::onShowTodoClicked()
@@ -242,6 +273,21 @@ void TodoSettingsPanel::onExportCsvClicked()
     QString filePath = QFileDialog::getSaveFileName(this, "导出日志", "", "CSV文件 (*.csv)");
     if (!filePath.isEmpty()) {
         LogManager::instance()->exportToCsv(filePath);
+    }
+}
+
+void TodoSettingsPanel::onClearLogsClicked()
+{
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        "确认重置",
+        "确定要清空所有日志记录吗？\n此操作不可撤销。",
+        QMessageBox::Yes | QMessageBox::No
+    );
+    
+    if (reply == QMessageBox::Yes) {
+        LogManager::instance()->clearLogs();
+        updateStats();
     }
 }
 

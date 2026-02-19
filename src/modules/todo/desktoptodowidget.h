@@ -58,6 +58,7 @@ protected:
 
 private slots:
     void onAddButtonClicked();
+    void onClearCompletedClicked();
     void onTaskCompletedChanged(int taskId, bool completed);
     void onTaskScoreChanged(int taskId, int score);
     void onTaskDeleteRequested(int taskId);
@@ -75,7 +76,9 @@ private:
 
     QVBoxLayout *m_mainLayout;
     QWidget *m_headerWidget;
+    QWidget *m_titleWidget;
     QLabel *m_dateLabel;
+    QPushButton *m_clearCompletedBtn;
     QLineEdit *m_taskInput;
     QPushButton *m_addBtn;
     QScrollArea *m_scrollArea;

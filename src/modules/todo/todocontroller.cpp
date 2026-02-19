@@ -6,6 +6,7 @@ TodoController::TodoController(QObject *parent)
     : QObject(parent)
     , m_settingsPanel(nullptr)
     , m_todoWidget(nullptr)
+    , m_firstShow(true)
 {
     m_settingsPanel = new TodoSettingsPanel();
     m_todoWidget = new DesktopTodoWidget();
@@ -43,11 +44,14 @@ DesktopTodoWidget* TodoController::todoWidget()
 void TodoController::showTodoWidget()
 {
     if (m_todoWidget) {
-        QScreen *screen = QApplication::primaryScreen();
-        QRect screenGeometry = screen->availableGeometry();
-        int x = screenGeometry.width() - m_todoWidget->width() - 50;
-        int y = 100;
-        m_todoWidget->move(x, y);
+        if (m_firstShow) {
+            QScreen *screen = QApplication::primaryScreen();
+            QRect screenGeometry = screen->availableGeometry();
+            int x = screenGeometry.width() - m_todoWidget->width() - 50;
+            int y = 100;
+            m_todoWidget->move(x, y);
+            m_firstShow = false;
+        }
         m_todoWidget->show();
         m_todoWidget->raise();
         m_todoWidget->activateWindow();
