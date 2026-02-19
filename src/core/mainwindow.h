@@ -10,6 +10,7 @@
 #include <QCloseEvent>
 
 class TimerController;
+class TodoController;
 
 class MainWindow : public QMainWindow
 {
@@ -25,6 +26,7 @@ protected:
 
 private slots:
     void onTimerModuleClicked();
+    void onTodoModuleClicked();
     void onBackToHome();
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
     void onShowWindow();
@@ -39,9 +41,13 @@ private:
     QWidget *m_homeWidget;
     QStackedWidget *m_stackedWidget;
     QPushButton *m_timerModuleBtn;
+    QPushButton *m_todoModuleBtn;
     
     TimerController *m_timerController;
     QWidget *m_timerPanel;
+    
+    TodoController *m_todoController;
+    QWidget *m_todoPanel;
     
     QSystemTrayIcon *m_trayIcon;
     QMenu *m_trayMenu;

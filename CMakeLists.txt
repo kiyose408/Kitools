@@ -27,6 +27,19 @@ set(SOURCES
     src/modules/timer/timersettingspanel.h
     src/modules/timer/settingsmanager.cpp
     src/modules/timer/settingsmanager.h
+    src/modules/todo/todocontroller.cpp
+    src/modules/todo/todocontroller.h
+    src/modules/todo/desktoptodowidget.cpp
+    src/modules/todo/desktoptodowidget.h
+    src/modules/todo/taskitemwidget.cpp
+    src/modules/todo/taskitemwidget.h
+    src/modules/todo/taskmanager.cpp
+    src/modules/todo/taskmanager.h
+    src/modules/todo/logmanager.cpp
+    src/modules/todo/logmanager.h
+    src/modules/todo/todosettingspanel.cpp
+    src/modules/todo/todosettingspanel.h
+    src/modules/todo/tododatatypes.h
 )
 
 set(HEADERS
@@ -35,6 +48,13 @@ set(HEADERS
     src/modules/timer/overlaywidget.h
     src/modules/timer/timersettingspanel.h
     src/modules/timer/settingsmanager.h
+    src/modules/todo/todocontroller.h
+    src/modules/todo/desktoptodowidget.h
+    src/modules/todo/taskitemwidget.h
+    src/modules/todo/taskmanager.h
+    src/modules/todo/logmanager.h
+    src/modules/todo/todosettingspanel.h
+    src/modules/todo/tododatatypes.h
 )
 
 set(RESOURCES
@@ -53,6 +73,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/timer
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/todo
 )
 
 if(WIN32)

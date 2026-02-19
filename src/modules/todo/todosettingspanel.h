@@ -1,0 +1,64 @@
+#ifndef TODOSETTINGSPANEL_H
+#define TODOSETTINGSPANEL_H
+
+#include <QWidget>
+#include <QPushButton>
+#include <QComboBox>
+#include <QLabel>
+#include <QSlider>
+#include <QColor>
+
+class DesktopTodoWidget;
+
+class TodoSettingsPanel : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit TodoSettingsPanel(QWidget *parent = nullptr);
+    ~TodoSettingsPanel();
+    
+    void setTodoWidget(DesktopTodoWidget *widget);
+    
+signals:
+    void backClicked();
+    void showTodoRequested();
+    void hideTodoRequested();
+
+private slots:
+    void onShowTodoClicked();
+    void onHideTodoClicked();
+    void onModeChanged(int index);
+    void onClearCompletedClicked();
+    void onExportJsonClicked();
+    void onExportCsvClicked();
+    void onBackClicked();
+    void onBackgroundColorClicked();
+    void onBackgroundOpacityChanged(int value);
+    void onFontChanged(int index);
+
+private:
+    void setupUi();
+    void setupConnections();
+    void updateStats();
+
+    DesktopTodoWidget *m_todoWidget;
+    
+    QPushButton *m_showBtn;
+    QPushButton *m_hideBtn;
+    QComboBox *m_modeCombo;
+    QPushButton *m_clearCompletedBtn;
+    QPushButton *m_exportJsonBtn;
+    QPushButton *m_exportCsvBtn;
+    QPushButton *m_backBtn;
+    QLabel *m_statsLabel;
+    
+    QPushButton *m_bgColorBtn;
+    QSlider *m_bgOpacitySlider;
+    QLabel *m_bgOpacityLabel;
+    QComboBox *m_fontCombo;
+    
+    QColor m_backgroundColor;
+};
+
+#endif

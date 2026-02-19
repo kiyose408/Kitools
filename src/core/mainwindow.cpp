@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "modules/timer/timercontroller.h"
 #include "modules/timer/timersettingspanel.h"
+#include "modules/todo/todocontroller.h"
+#include "modules/todo/todosettingspanel.h"
 #include <QLabel>
 #include <QScrollArea>
 #include <QApplication>
@@ -11,8 +13,11 @@ MainWindow::MainWindow(QWidget *parent)
     , m_homeWidget(nullptr)
     , m_stackedWidget(nullptr)
     , m_timerModuleBtn(nullptr)
+    , m_todoModuleBtn(nullptr)
     , m_timerController(nullptr)
     , m_timerPanel(nullptr)
+    , m_todoController(nullptr)
+    , m_todoPanel(nullptr)
     , m_trayIcon(nullptr)
     , m_trayMenu(nullptr)
     , m_showAction(nullptr)
@@ -74,10 +79,10 @@ void MainWindow::setupUi()
     m_timerModuleBtn->setCursor(Qt::PointingHandCursor);
     homeLayout->addWidget(m_timerModuleBtn);
 
-    QPushButton *todoModuleBtn = new QPushButton("📋 桌面待办事项 (开发中)", m_homeWidget);
-    todoModuleBtn->setStyleSheet(
+    m_todoModuleBtn = new QPushButton("📋 桌面待办事项", m_homeWidget);
+    m_todoModuleBtn->setStyleSheet(
         "QPushButton {"
-        "  background-color: #95a5a6;"
+        "  background-color: #9b59b6;"
         "  color: white;"
         "  border: none;"
         "  padding: 20px;"
@@ -85,11 +90,14 @@ void MainWindow::setupUi()
         "  border-radius: 8px;"
         "}"
         "QPushButton:hover {"
-        "  background-color: #7f8c8d;"
+        "  background-color: #8e44ad;"
+        "}"
+        "QPushButton:pressed {"
+        "  background-color: #7d3c98;"
         "}"
     );
-    todoModuleBtn->setEnabled(false);
-    homeLayout->addWidget(todoModuleBtn);
+    m_todoModuleBtn->setCursor(Qt::PointingHandCursor);
+    homeLayout->addWidget(m_todoModuleBtn);
 
     homeLayout->addStretch();
 
@@ -99,16 +107,26 @@ void MainWindow::setupUi()
     m_timerPanel = m_timerController->settingsPanel();
     m_stackedWidget->addWidget(m_timerPanel);
 
+    m_todoController = new TodoController(this);
+    m_todoPanel = m_todoController->settingsPanel();
+    m_stackedWidget->addWidget(m_todoPanel);
+
     m_stackedWidget->setCurrentWidget(m_homeWidget);
 }
 
 void MainWindow::setupConnections()
 {
     connect(m_timerModuleBtn, &QPushButton::clicked, this, &MainWindow::onTimerModuleClicked);
+    connect(m_todoModuleBtn, &QPushButton::clicked, this, &MainWindow::onTodoModuleClicked);
     
     TimerSettingsPanel *timerPanel = qobject_cast<TimerSettingsPanel*>(m_timerPanel);
     if (timerPanel) {
         connect(timerPanel, &TimerSettingsPanel::backClicked, this, &MainWindow::onBackToHome);
+    }
+    
+    TodoSettingsPanel *todoPanel = qobject_cast<TodoSettingsPanel*>(m_todoPanel);
+    if (todoPanel) {
+        connect(todoPanel, &TodoSettingsPanel::backClicked, this, &MainWindow::onBackToHome);
     }
 }
 
@@ -188,6 +206,12 @@ void MainWindow::onTimerModuleClicked()
     }
     m_stackedWidget->setCurrentWidget(m_timerPanel);
     m_timerController->showOverlay();
+}
+
+void MainWindow::onTodoModuleClicked()
+{
+    m_stackedWidget->setCurrentWidget(m_todoPanel);
+    m_todoController->showTodoWidget();
 }
 
 void MainWindow::onBackToHome()
