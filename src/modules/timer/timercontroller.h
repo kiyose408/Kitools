@@ -45,10 +45,12 @@ private:
     QTimer *m_timer;
     
     int m_remainingSeconds;
+    int m_elapsedSeconds;
     int m_currentCycle;
     bool m_isWorkingPhase;
     bool m_isCycleMode;
     bool m_isPaused;
+    TimerSettingsPanel::TimerMode m_currentMode;
 };
 
 #endif

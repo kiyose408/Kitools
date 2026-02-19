@@ -9,10 +9,12 @@ TimerController::TimerController(QObject *parent)
     , m_overlayWidget(nullptr)
     , m_timer(nullptr)
     , m_remainingSeconds(0)
+    , m_elapsedSeconds(0)
     , m_currentCycle(0)
     , m_isWorkingPhase(true)
     , m_isCycleMode(false)
     , m_isPaused(false)
+    , m_currentMode(TimerSettingsPanel::TimerMode::SingleCountdown)
 {
     m_settingsPanel = new TimerSettingsPanel();
     m_overlayWidget = new OverlayWidget();
@@ -60,7 +62,14 @@ void TimerController::showOverlay()
     if (m_overlayWidget) {
         applySettings();
         
-        if (!m_timer->isActive() && m_remainingSeconds == 0) {
+        bool shouldReset = false;
+        if (m_currentMode == TimerSettingsPanel::TimerMode::Stopwatch) {
+            shouldReset = !m_timer->isActive() && m_elapsedSeconds == 0;
+        } else {
+            shouldReset = !m_timer->isActive() && m_remainingSeconds == 0;
+        }
+        
+        if (shouldReset) {
             QScreen *screen = QApplication::primaryScreen();
             QRect screenGeometry = screen->availableGeometry();
             int x = (screenGeometry.width() - m_overlayWidget->width()) / 2;
@@ -87,6 +96,9 @@ bool TimerController::isTimerRunning() const
 
 bool TimerController::isTimerPaused() const
 {
+    if (m_currentMode == TimerSettingsPanel::TimerMode::Stopwatch) {
+        return m_isPaused && !m_timer->isActive() && m_elapsedSeconds > 0;
+    }
     return m_isPaused && !m_timer->isActive() && m_remainingSeconds > 0;
 }
 
@@ -95,16 +107,31 @@ void TimerController::start()
     if (m_isPaused) {
         m_isPaused = false;
     } else {
+        m_currentMode = m_settingsPanel->currentMode();
         m_isCycleMode = m_settingsPanel->isCycleMode();
         
-        if (m_isCycleMode) {
-            m_currentCycle = 1;
-            m_isWorkingPhase = true;
-            m_remainingSeconds = m_settingsPanel->workMinutes() * 60;
-            m_overlayWidget->setPhase(OverlayWidget::TimerPhase::Working);
-        } else {
-            m_remainingSeconds = calculateTotalSeconds();
-            m_overlayWidget->setPhase(OverlayWidget::TimerPhase::Working);
+        switch (m_currentMode) {
+            case TimerSettingsPanel::TimerMode::SingleCountdown:
+                m_remainingSeconds = calculateTotalSeconds();
+                m_elapsedSeconds = 0;
+                m_overlayWidget->setPhase(OverlayWidget::TimerPhase::Working);
+                break;
+                
+            case TimerSettingsPanel::TimerMode::Pomodoro:
+                m_currentCycle = 1;
+                m_isWorkingPhase = true;
+                m_remainingSeconds = m_settingsPanel->workMinutes() * 60;
+                m_elapsedSeconds = 0;
+                m_overlayWidget->setPhase(OverlayWidget::TimerPhase::Working);
+                break;
+                
+            case TimerSettingsPanel::TimerMode::Stopwatch:
+                m_remainingSeconds = 0;
+                if (m_elapsedSeconds == 0) {
+                    m_elapsedSeconds = 0;
+                }
+                m_overlayWidget->setPhase(OverlayWidget::TimerPhase::Stopwatch);
+                break;
         }
     }
     
@@ -124,6 +151,7 @@ void TimerController::stop()
     m_timer->stop();
     m_isPaused = false;
     m_remainingSeconds = 0;
+    m_elapsedSeconds = 0;
     m_currentCycle = 0;
     
     m_overlayWidget->stopFlashing();
@@ -134,21 +162,30 @@ void TimerController::stop()
 void TimerController::reset()
 {
     stop();
-    if (m_isCycleMode) {
+    if (m_currentMode == TimerSettingsPanel::TimerMode::Stopwatch) {
+        m_elapsedSeconds = 0;
+        m_overlayWidget->setTime(0);
+    } else if (m_isCycleMode) {
         m_remainingSeconds = m_settingsPanel->workMinutes() * 60;
+        updateOverlay();
     } else {
         m_remainingSeconds = calculateTotalSeconds();
+        updateOverlay();
     }
-    updateOverlay();
 }
 
 void TimerController::onTimerTick()
 {
-    if (m_remainingSeconds > 0) {
-        m_remainingSeconds--;
+    if (m_currentMode == TimerSettingsPanel::TimerMode::Stopwatch) {
+        m_elapsedSeconds++;
         updateOverlay();
     } else {
-        onTimerComplete();
+        if (m_remainingSeconds > 0) {
+            m_remainingSeconds--;
+            updateOverlay();
+        } else {
+            onTimerComplete();
+        }
     }
 }
 
@@ -160,7 +197,11 @@ void TimerController::onSettingsChanged()
 void TimerController::updateOverlay()
 {
     if (m_overlayWidget) {
-        m_overlayWidget->setTime(m_remainingSeconds);
+        if (m_currentMode == TimerSettingsPanel::TimerMode::Stopwatch) {
+            m_overlayWidget->setTime(m_elapsedSeconds);
+        } else {
+            m_overlayWidget->setTime(m_remainingSeconds);
+        }
     }
 }
 

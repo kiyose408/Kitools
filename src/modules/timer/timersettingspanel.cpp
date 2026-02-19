@@ -18,6 +18,7 @@ TimerSettingsPanel::TimerSettingsPanel(QWidget *parent)
     , m_workMinutesSpin(nullptr)
     , m_breakMinutesSpin(nullptr)
     , m_cycleCountSpin(nullptr)
+    , m_stopwatchModeWidget(nullptr)
     , m_startBtn(nullptr)
     , m_pauseBtn(nullptr)
     , m_stopBtn(nullptr)
@@ -91,7 +92,7 @@ void TimerSettingsPanel::setupUi()
     singleLayout->addWidget(m_singleSecondsSpin, 0, 5);
     
     singleLayout->setColumnStretch(6, 1);
-    m_modeTabWidget->addTab(m_singleModeWidget, "单次计时");
+    m_modeTabWidget->addTab(m_singleModeWidget, "倒计时");
 
     m_cycleModeWidget = new QWidget();
     QGridLayout *cycleLayout = new QGridLayout(m_cycleModeWidget);
@@ -116,7 +117,19 @@ void TimerSettingsPanel::setupUi()
     cycleLayout->addWidget(m_cycleCountSpin, 0, 5);
     
     cycleLayout->setColumnStretch(6, 1);
-    m_modeTabWidget->addTab(m_cycleModeWidget, "番茄钟模式");
+    m_modeTabWidget->addTab(m_cycleModeWidget, "番茄钟");
+
+    m_stopwatchModeWidget = new QWidget();
+    QVBoxLayout *stopwatchLayout = new QVBoxLayout(m_stopwatchModeWidget);
+    stopwatchLayout->setSpacing(10);
+    
+    QLabel *stopwatchDesc = new QLabel("正向计时模式：从零开始计时，适用于记录工作时长、运动计时等场景。", m_stopwatchModeWidget);
+    stopwatchDesc->setStyleSheet("color: #7f8c8d; font-size: 13px;");
+    stopwatchDesc->setWordWrap(true);
+    stopwatchLayout->addWidget(stopwatchDesc);
+    
+    stopwatchLayout->addStretch();
+    m_modeTabWidget->addTab(m_stopwatchModeWidget, "正向计时");
 
     mainLayout->addWidget(m_modeTabWidget);
 
@@ -316,6 +329,16 @@ int TimerSettingsPanel::breakMinutes() const
 int TimerSettingsPanel::cycleCount() const
 {
     return m_cycleCountSpin->value();
+}
+
+TimerSettingsPanel::TimerMode TimerSettingsPanel::currentMode() const
+{
+    switch (m_modeTabWidget->currentIndex()) {
+        case 0: return TimerMode::SingleCountdown;
+        case 1: return TimerMode::Pomodoro;
+        case 2: return TimerMode::Stopwatch;
+        default: return TimerMode::SingleCountdown;
+    }
 }
 
 bool TimerSettingsPanel::isCycleMode() const

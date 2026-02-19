@@ -16,6 +16,12 @@ class TimerSettingsPanel : public QWidget
     Q_OBJECT
 
 public:
+    enum class TimerMode {
+        SingleCountdown,
+        Pomodoro,
+        Stopwatch
+    };
+
     explicit TimerSettingsPanel(QWidget *parent = nullptr);
     ~TimerSettingsPanel();
 
@@ -27,6 +33,7 @@ public:
     int breakMinutes() const;
     int cycleCount() const;
     
+    TimerMode currentMode() const;
     bool isCycleMode() const;
     
     int overlayWidth() const;
@@ -89,6 +96,8 @@ private:
     QSpinBox *m_workMinutesSpin;
     QSpinBox *m_breakMinutesSpin;
     QSpinBox *m_cycleCountSpin;
+    
+    QWidget *m_stopwatchModeWidget;
     
     QPushButton *m_startBtn;
     QPushButton *m_pauseBtn;

@@ -224,6 +224,8 @@ QString OverlayWidget::phaseText() const
             return tr("工作中");
         case TimerPhase::Breaking:
             return tr("休息中");
+        case TimerPhase::Stopwatch:
+            return tr("计时中");
         default:
             return tr("就绪");
     }
@@ -236,6 +238,8 @@ QColor OverlayWidget::phaseColor() const
             return QColor(231, 76, 60);
         case TimerPhase::Breaking:
             return QColor(46, 204, 113);
+        case TimerPhase::Stopwatch:
+            return QColor(52, 152, 219);
         default:
             return QColor(149, 165, 166);
     }

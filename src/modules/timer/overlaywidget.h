@@ -15,7 +15,8 @@ public:
     enum class TimerPhase {
         Idle,
         Working,
-        Breaking
+        Breaking,
+        Stopwatch
     };
 
     explicit OverlayWidget(QWidget *parent = nullptr);
