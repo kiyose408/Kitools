@@ -54,6 +54,7 @@ public:
     void setFlashEnabled(bool enabled);
     
     void resetControls();
+    void setRunningState(bool isRunning, bool isPaused = false);
 
 signals:
     void startClicked();

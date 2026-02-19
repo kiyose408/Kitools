@@ -182,6 +182,10 @@ void MainWindow::changeEvent(QEvent *event)
 
 void MainWindow::onTimerModuleClicked()
 {
+    TimerSettingsPanel *timerPanel = qobject_cast<TimerSettingsPanel*>(m_timerPanel);
+    if (timerPanel) {
+        timerPanel->setRunningState(m_timerController->isTimerRunning(), m_timerController->isTimerPaused());
+    }
     m_stackedWidget->setCurrentWidget(m_timerPanel);
     m_timerController->showOverlay();
 }

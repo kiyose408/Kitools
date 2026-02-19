@@ -448,6 +448,27 @@ void TimerSettingsPanel::resetControls()
     m_modeTabWidget->setEnabled(true);
 }
 
+void TimerSettingsPanel::setRunningState(bool isRunning, bool isPaused)
+{
+    m_isRunning = isRunning;
+    if (isRunning) {
+        m_startBtn->setEnabled(false);
+        m_pauseBtn->setEnabled(!isPaused);
+        m_stopBtn->setEnabled(true);
+        m_modeTabWidget->setEnabled(false);
+    } else if (isPaused) {
+        m_startBtn->setEnabled(true);
+        m_pauseBtn->setEnabled(false);
+        m_stopBtn->setEnabled(true);
+        m_modeTabWidget->setEnabled(false);
+    } else {
+        m_startBtn->setEnabled(true);
+        m_pauseBtn->setEnabled(false);
+        m_stopBtn->setEnabled(false);
+        m_modeTabWidget->setEnabled(true);
+    }
+}
+
 void TimerSettingsPanel::onStartClicked()
 {
     m_isRunning = true;

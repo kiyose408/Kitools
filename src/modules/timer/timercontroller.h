@@ -19,6 +19,8 @@ public:
     
     void showOverlay();
     void hideOverlay();
+    bool isTimerRunning() const;
+    bool isTimerPaused() const;
 
 public slots:
     void start();

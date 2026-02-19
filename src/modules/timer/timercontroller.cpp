@@ -60,14 +60,16 @@ void TimerController::showOverlay()
     if (m_overlayWidget) {
         applySettings();
         
-        QScreen *screen = QApplication::primaryScreen();
-        QRect screenGeometry = screen->availableGeometry();
-        int x = (screenGeometry.width() - m_overlayWidget->width()) / 2;
-        int y = 50;
-        m_overlayWidget->move(x, y);
+        if (!m_timer->isActive() && m_remainingSeconds == 0) {
+            QScreen *screen = QApplication::primaryScreen();
+            QRect screenGeometry = screen->availableGeometry();
+            int x = (screenGeometry.width() - m_overlayWidget->width()) / 2;
+            int y = 50;
+            m_overlayWidget->move(x, y);
+            m_overlayWidget->setPhase(OverlayWidget::TimerPhase::Idle);
+        }
         
         m_overlayWidget->show();
-        m_overlayWidget->setPhase(OverlayWidget::TimerPhase::Idle);
     }
 }
 
@@ -76,6 +78,16 @@ void TimerController::hideOverlay()
     if (m_overlayWidget) {
         m_overlayWidget->hide();
     }
+}
+
+bool TimerController::isTimerRunning() const
+{
+    return m_timer->isActive();
+}
+
+bool TimerController::isTimerPaused() const
+{
+    return m_isPaused && !m_timer->isActive() && m_remainingSeconds > 0;
 }
 
 void TimerController::start()
