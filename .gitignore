@@ -121,3 +121,4 @@ conan/
 # Test results
 Testing/
 CTestTestfile.cmake
+*.rar
