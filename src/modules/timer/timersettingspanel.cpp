@@ -502,10 +502,5 @@ void TimerSettingsPanel::onTextColorClicked()
 void TimerSettingsPanel::onBackClicked()
 {
     saveSettings();
-    emit stopClicked();
-    m_isRunning = false;
-    m_startBtn->setEnabled(true);
-    m_pauseBtn->setEnabled(false);
-    m_stopBtn->setEnabled(false);
-    m_modeTabWidget->setEnabled(true);
+    emit backClicked();
 }

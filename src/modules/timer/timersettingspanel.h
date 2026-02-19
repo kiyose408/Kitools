@@ -60,6 +60,7 @@ signals:
     void pauseClicked();
     void stopClicked();
     void settingsChanged();
+    void backClicked();
 
 private slots:
     void onStartClicked();

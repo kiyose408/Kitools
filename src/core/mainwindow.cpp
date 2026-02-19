@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "modules/timer/timercontroller.h"
+#include "modules/timer/timersettingspanel.h"
 #include <QLabel>
 #include <QScrollArea>
 #include <QApplication>
@@ -104,6 +105,11 @@ void MainWindow::setupUi()
 void MainWindow::setupConnections()
 {
     connect(m_timerModuleBtn, &QPushButton::clicked, this, &MainWindow::onTimerModuleClicked);
+    
+    TimerSettingsPanel *timerPanel = qobject_cast<TimerSettingsPanel*>(m_timerPanel);
+    if (timerPanel) {
+        connect(timerPanel, &TimerSettingsPanel::backClicked, this, &MainWindow::onBackToHome);
+    }
 }
 
 void MainWindow::setupTrayIcon()
@@ -178,6 +184,11 @@ void MainWindow::onTimerModuleClicked()
 {
     m_stackedWidget->setCurrentWidget(m_timerPanel);
     m_timerController->showOverlay();
+}
+
+void MainWindow::onBackToHome()
+{
+    m_stackedWidget->setCurrentWidget(m_homeWidget);
 }
 
 void MainWindow::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)

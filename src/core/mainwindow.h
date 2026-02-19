@@ -25,6 +25,7 @@ protected:
 
 private slots:
     void onTimerModuleClicked();
+    void onBackToHome();
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
     void onShowWindow();
     void onQuitApplication();
