@@ -8,12 +8,18 @@
 #include <QPainter>
 #include <QDate>
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
+
 DesktopTodoWidget::DesktopTodoWidget(QWidget *parent)
     : QWidget(parent)
     , m_mainLayout(nullptr)
     , m_headerWidget(nullptr)
     , m_titleWidget(nullptr)
     , m_dateLabel(nullptr)
+    , m_pinBtn(nullptr)
+    , m_modeBtn(nullptr)
     , m_clearCompletedBtn(nullptr)
     , m_taskInput(nullptr)
     , m_addBtn(nullptr)
@@ -23,19 +29,28 @@ DesktopTodoWidget::DesktopTodoWidget(QWidget *parent)
     , m_countLabel(nullptr)
     , m_displayMode(DisplayMode::AlwaysOnTop)
     , m_isDragging(false)
+    , m_isLocked(false)
     , m_backgroundColor(255, 255, 255)
     , m_backgroundOpacity(230)
     , m_contentFont()
+    , m_stayOnTopTimer(nullptr)
 {
     setupUi();
     setupConnections();
     applyWindowFlags();
     applyStyleSheet();
     refreshTasks();
+    
+    m_stayOnTopTimer = new QTimer(this);
+    connect(m_stayOnTopTimer, &QTimer::timeout, this, &DesktopTodoWidget::onStayOnTop);
+    m_stayOnTopTimer->start(100);
 }
 
 DesktopTodoWidget::~DesktopTodoWidget()
 {
+    if (m_stayOnTopTimer) {
+        m_stayOnTopTimer->stop();
+    }
 }
 
 void DesktopTodoWidget::setupUi()
@@ -53,6 +68,26 @@ void DesktopTodoWidget::setupUi()
     QHBoxLayout *titleLayout = new QHBoxLayout(m_titleWidget);
     titleLayout->setContentsMargins(0, 0, 0, 0);
     titleLayout->setSpacing(5);
+    
+    m_pinBtn = new QPushButton("📌", m_titleWidget);
+    m_pinBtn->setFixedSize(28, 28);
+    m_pinBtn->setToolTip("点击锁定窗口位置");
+    m_pinBtn->setStyleSheet(
+        "QPushButton { background-color: transparent; border: none; font-size: 16px; }"
+        "QPushButton:hover { background-color: rgba(0,0,0,0.1); border-radius: 14px; }"
+    );
+    titleLayout->addWidget(m_pinBtn);
+    
+    m_modeBtn = new QPushButton("置顶", m_titleWidget);
+    m_modeBtn->setFixedHeight(26);
+    m_modeBtn->setToolTip("点击切换显示模式");
+    m_modeBtn->setStyleSheet(
+        "QPushButton { background-color: #3498db; color: white; border: none; border-radius: 5px; "
+        "font-size: 12px; padding: 2px 10px; }"
+        "QPushButton:hover { background-color: #2980b9; }"
+        "QPushButton:pressed { background-color: #1f618d; }"
+    );
+    titleLayout->addWidget(m_modeBtn);
     
     m_dateLabel = new QLabel(m_titleWidget);
     m_dateLabel->setAlignment(Qt::AlignCenter);
@@ -119,6 +154,8 @@ void DesktopTodoWidget::setupConnections()
 {
     connect(m_addBtn, &QPushButton::clicked, this, &DesktopTodoWidget::onAddButtonClicked);
     connect(m_clearCompletedBtn, &QPushButton::clicked, this, &DesktopTodoWidget::onClearCompletedClicked);
+    connect(m_pinBtn, &QPushButton::clicked, this, &DesktopTodoWidget::onPinButtonClicked);
+    connect(m_modeBtn, &QPushButton::clicked, this, &DesktopTodoWidget::onModeButtonClicked);
     connect(m_taskInput, &QLineEdit::returnPressed, this, &DesktopTodoWidget::onAddButtonClicked);
     
     TaskManager *tm = TaskManager::instance();
@@ -140,7 +177,33 @@ void DesktopTodoWidget::setDisplayMode(DisplayMode mode)
 {
     m_displayMode = mode;
     applyWindowFlags();
+    updateModeButtonStyle();
+    
+    if (mode == DisplayMode::DesktopFixed) {
+        m_isLocked = true;
+        updatePinButtonStyle();
+        moveToTopRight();
+    }
+    
     show();
+    raise();
+    activateWindow();
+}
+
+void DesktopTodoWidget::setLocked(bool locked)
+{
+    m_isLocked = locked;
+    updatePinButtonStyle();
+    emit lockChanged(locked);
+}
+
+void DesktopTodoWidget::moveToTopRight()
+{
+    QScreen *screen = QApplication::primaryScreen();
+    QRect screenGeometry = screen->availableGeometry();
+    int x = screenGeometry.width() - width() - 20;
+    int y = 20;
+    move(x, y);
 }
 
 void DesktopTodoWidget::setBackgroundColor(const QColor &color)
@@ -179,7 +242,7 @@ void DesktopTodoWidget::applyWindowFlags()
     if (m_displayMode == DisplayMode::AlwaysOnTop) {
         flags = Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Tool;
     } else {
-        flags = Qt::Tool | Qt::FramelessWindowHint;
+        flags = Qt::WindowStaysOnBottomHint | Qt::FramelessWindowHint | Qt::Tool;
     }
     
     setWindowFlags(flags);
@@ -225,6 +288,58 @@ void DesktopTodoWidget::applyStyleSheet()
     m_taskContainer->setStyleSheet("QWidget { background: transparent; }");
     
     m_countLabel->setStyleSheet(QString("background: transparent; color: #7f8c8d; font-size: 12px; %1").arg(fontStr));
+}
+
+void DesktopTodoWidget::updatePinButtonStyle()
+{
+    if (m_isLocked) {
+        m_pinBtn->setStyleSheet(
+            "QPushButton { background-color: #3498db; border: none; border-radius: 14px; font-size: 16px; }"
+            "QPushButton:hover { background-color: #2980b9; }"
+        );
+        m_pinBtn->setToolTip("已锁定，点击解锁");
+    } else {
+        m_pinBtn->setStyleSheet(
+            "QPushButton { background-color: transparent; border: none; font-size: 16px; }"
+            "QPushButton:hover { background-color: rgba(0,0,0,0.1); border-radius: 14px; }"
+        );
+        m_pinBtn->setToolTip("点击锁定窗口位置");
+    }
+}
+
+void DesktopTodoWidget::updateModeButtonStyle()
+{
+    if (m_displayMode == DisplayMode::AlwaysOnTop) {
+        m_modeBtn->setText("置顶");
+        m_modeBtn->setStyleSheet(
+            "QPushButton { background-color: #3498db; color: white; border: none; border-radius: 5px; "
+            "font-size: 12px; padding: 2px 10px; }"
+            "QPushButton:hover { background-color: #2980b9; }"
+            "QPushButton:pressed { background-color: #1f618d; }"
+        );
+        m_modeBtn->setToolTip("当前：置顶模式，点击切换为桌面固定");
+    } else {
+        m_modeBtn->setText("固定");
+        m_modeBtn->setStyleSheet(
+            "QPushButton { background-color: #9b59b6; color: white; border: none; border-radius: 5px; "
+            "font-size: 12px; padding: 2px 10px; }"
+            "QPushButton:hover { background-color: #8e44ad; }"
+            "QPushButton:pressed { background-color: #7d3c98; }"
+        );
+        m_modeBtn->setToolTip("当前：桌面固定模式，点击切换为置顶");
+    }
+}
+
+void DesktopTodoWidget::onStayOnTop()
+{
+    if (m_displayMode == DisplayMode::AlwaysOnTop && isVisible()) {
+#ifdef Q_OS_WIN
+        HWND hwnd = reinterpret_cast<HWND>(winId());
+        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+#else
+        raise();
+#endif
+    }
 }
 
 void DesktopTodoWidget::updateDateLabel()
@@ -311,6 +426,21 @@ void DesktopTodoWidget::onClearCompletedClicked()
     TaskManager::instance()->clearCompletedTasks();
 }
 
+void DesktopTodoWidget::onPinButtonClicked()
+{
+    setLocked(!m_isLocked);
+}
+
+void DesktopTodoWidget::onModeButtonClicked()
+{
+    if (m_displayMode == DisplayMode::AlwaysOnTop) {
+        setDisplayMode(DisplayMode::DesktopFixed);
+    } else {
+        setDisplayMode(DisplayMode::AlwaysOnTop);
+    }
+    emit displayModeChanged(m_displayMode);
+}
+
 void DesktopTodoWidget::onTaskCompletedChanged(int taskId, bool completed)
 {
     TaskManager *tm = TaskManager::instance();
@@ -377,7 +507,7 @@ void DesktopTodoWidget::paintEvent(QPaintEvent *event)
 
 void DesktopTodoWidget::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
+    if (!m_isLocked && event->button() == Qt::LeftButton) {
         m_isDragging = true;
         m_dragPosition = event->globalPosition().toPoint() - frameGeometry().topLeft();
     }
@@ -386,7 +516,7 @@ void DesktopTodoWidget::mousePressEvent(QMouseEvent *event)
 
 void DesktopTodoWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    if (m_isDragging && (event->buttons() & Qt::LeftButton)) {
+    if (!m_isLocked && m_isDragging && (event->buttons() & Qt::LeftButton)) {
         move(event->globalPosition().toPoint() - m_dragPosition);
     }
     QWidget::mouseMoveEvent(event);

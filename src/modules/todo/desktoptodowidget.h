@@ -10,6 +10,7 @@
 #include <QMap>
 #include <QColor>
 #include <QFont>
+#include <QTimer>
 #include "tododatatypes.h"
 
 class TaskItemWidget;
@@ -41,6 +42,9 @@ public:
     
     void refreshTasks();
     void clearAllTasks();
+    
+    void setLocked(bool locked);
+    bool isLocked() const { return m_isLocked; }
 
 signals:
     void taskAdded(const QString &description);
@@ -49,6 +53,7 @@ signals:
     void taskDeleted(int taskId);
     void taskEdited(int taskId, const QString &newText);
     void displayModeChanged(DisplayMode mode);
+    void lockChanged(bool locked);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -59,6 +64,9 @@ protected:
 private slots:
     void onAddButtonClicked();
     void onClearCompletedClicked();
+    void onPinButtonClicked();
+    void onModeButtonClicked();
+    void onStayOnTop();
     void onTaskCompletedChanged(int taskId, bool completed);
     void onTaskScoreChanged(int taskId, int score);
     void onTaskDeleteRequested(int taskId);
@@ -73,11 +81,16 @@ private:
     void applyWindowFlags();
     void updateDateLabel();
     void applyStyleSheet();
+    void updatePinButtonStyle();
+    void updateModeButtonStyle();
+    void moveToTopRight();
 
     QVBoxLayout *m_mainLayout;
     QWidget *m_headerWidget;
     QWidget *m_titleWidget;
     QLabel *m_dateLabel;
+    QPushButton *m_pinBtn;
+    QPushButton *m_modeBtn;
     QPushButton *m_clearCompletedBtn;
     QLineEdit *m_taskInput;
     QPushButton *m_addBtn;
@@ -91,10 +104,13 @@ private:
     DisplayMode m_displayMode;
     bool m_isDragging;
     QPoint m_dragPosition;
+    bool m_isLocked;
     
     QColor m_backgroundColor;
     int m_backgroundOpacity;
     QFont m_contentFont;
+    
+    QTimer *m_stayOnTopTimer;
 };
 
 #endif

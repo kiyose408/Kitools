@@ -213,6 +213,17 @@ void TodoSettingsPanel::setTodoWidget(DesktopTodoWidget *widget)
 {
     m_todoWidget = widget;
     updateStats();
+    
+    if (m_todoWidget) {
+        connect(m_todoWidget, &DesktopTodoWidget::displayModeChanged, this, [this](DesktopTodoWidget::DisplayMode mode) {
+            int index = m_modeCombo->findData(static_cast<int>(mode));
+            if (index >= 0) {
+                m_modeCombo->blockSignals(true);
+                m_modeCombo->setCurrentIndex(index);
+                m_modeCombo->blockSignals(false);
+            }
+        });
+    }
 }
 
 void TodoSettingsPanel::updateStats()
