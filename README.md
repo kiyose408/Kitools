@@ -1,6 +1,6 @@
 # PC效率工具箱 (PC Productivity Toolbox)
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/your-repo/kitools)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/your-repo/kitools)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey.svg)](https://www.microsoft.com/windows)
 [![Qt](https://img.shields.io/badge/Qt-6.9.0-green.svg)](https://www.qt.io)
 [![C++](https://img.shields.io/badge/C%2B%2B-17-orange.svg)](https://isocpp.org/)
@@ -31,6 +31,7 @@
 |------|------|------|
 | 时间管理困难 | 缺乏有效的时间追踪和提醒手段 | 工作效率低下 |
 | 任务碎片化 | 待办事项分散在各处，难以统一管理 | 重要事项遗漏 |
+| 信息记录零散 | 临时想法、笔记无处安放 | 灵感丢失 |
 | 专注力不足 | 缺乏专注工具，容易分心 | 工作质量下降 |
 | 数据不集中 | 效率数据分散，难以分析改进 | 无法持续优化 |
 
@@ -51,10 +52,10 @@
 
 | 用户群体 | 典型场景 |
 |---------|---------|
-| 程序员 | 番茄工作法、任务追踪、专注编程 |
-| 学生 | 学习计时、作业管理、考试复习 |
-| 自由职业者 | 时间记录、项目管理、效率统计 |
-| 办公人员 | 会议提醒、任务清单、时间规划 |
+| 程序员 | 番茄工作法、任务追踪、代码片段、专注编程 |
+| 学生 | 学习计时、作业管理、笔记记录、考试复习 |
+| 自由职业者 | 时间记录、项目管理、灵感捕捉、效率统计 |
+| 办公人员 | 会议提醒、任务清单、便签记录、时间规划 |
 
 ---
 
@@ -63,20 +64,20 @@
 ### 2.1 功能概览
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    PC效率工具箱                          │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│   ┌─────────────────┐      ┌─────────────────┐         │
-│   │  桌面置顶计时器  │      │  桌面待办事项   │         │
-│   │                 │      │                 │         │
-│   │  • 倒计时模式   │      │  • 任务管理     │         │
-│   │  • 番茄钟模式   │      │  • 完成度评分   │         │
-│   │  • 正向计时模式 │      │  • 日志记录     │         │
-│   │  • 外观自定义   │      │  • 深色模式     │         │
-│   └─────────────────┘      └─────────────────┘         │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                      PC效率工具箱                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
+│   │ 桌面置顶计时 │  │ 桌面待办事项 │  │  桌面便签   │            │
+│   │             │  │             │  │             │            │
+│   │ • 倒计时    │  │ • 任务管理  │  │ • 独立窗口  │            │
+│   │ • 番茄钟    │  │ • 完成评分  │  │ • Markdown  │            │
+│   │ • 正向计时  │  │ • 日志记录  │  │ • 提醒功能  │            │
+│   │ • 外观自定义│  │ • 深色模式  │  │ • 颜色分类  │            │
+│   └─────────────┘  └─────────────┘  └─────────────┘            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### 2.2 模块一：桌面置顶计时器
@@ -129,7 +130,48 @@
 └─────────────────────────────────────┘
 ```
 
-### 2.4 系统托盘集成
+### 2.4 模块三：桌面便签
+
+#### 功能特性
+
+| 功能 | 描述 |
+|------|------|
+| 独立窗口 | 每个便签都是独立窗口，可拖动到桌面任意位置 |
+| Markdown支持 | 标题、粗体、斜体、代码块、链接等 |
+| 颜色分类 | 黄/绿/蓝/粉/紫 五种预设颜色 |
+| 提醒功能 | 设置提醒时间，到时系统通知+窗口闪烁 |
+| 正反色闪烁 | 提醒时背景色与反色交替闪烁，效果醒目 |
+
+#### 界面预览
+
+```
+┌─────────────────────────────────┐
+│ 🟡 会议笔记              ✏  ×  │
+├─────────────────────────────────┤
+│ ## 今日会议                      │
+│ - 讨论项目进度                   │
+│ - **重点**: 下周截止             │
+│                                 │
+│ 提醒: 2026-02-28 09:00          │
+└─────────────────────────────────┘
+```
+
+#### Markdown 支持语法
+
+| 语法 | 效果 |
+|------|------|
+| `# 标题` | 一级标题 |
+| `## 标题` | 二级标题 |
+| `### 标题` | 三级标题 |
+| `**粗体**` | **粗体** |
+| `*斜体*` | *斜体* |
+| `~~删除线~~` | ~~删除线~~ |
+| `` `代码` `` | `代码` |
+| ` ```代码块``` ` | 多行代码块 |
+| `[链接](URL)` | 可点击链接 |
+| `- 列表项` | • 列表项 |
+
+### 2.5 系统托盘集成
 
 - 最小化到托盘，后台运行
 - 托盘菜单快速操作
@@ -175,14 +217,23 @@ kitools/
 │       │   ├── timersettingspanel.h/cpp
 │       │   └── settingsmanager.h/cpp
 │       │
-│       └── todo/                    # 待办事项模块
-│           ├── todocontroller.h/cpp
-│           ├── desktoptodowidget.h/cpp
-│           ├── taskitemwidget.h/cpp
-│           ├── taskmanager.h/cpp
-│           ├── logmanager.h/cpp
-│           ├── todosettingspanel.h/cpp
-│           └── tododatatypes.h
+│       ├── todo/                    # 待办事项模块
+│       │   ├── todocontroller.h/cpp
+│       │   ├── desktoptodowidget.h/cpp
+│       │   ├── taskitemwidget.h/cpp
+│       │   ├── taskmanager.h/cpp
+│       │   ├── logmanager.h/cpp
+│       │   ├── todosettingspanel.h/cpp
+│       │   └── tododatatypes.h
+│       │
+│       └── notes/                   # 便签模块
+│           ├── notescontroller.h/cpp
+│           ├── noteswidget.h/cpp
+│           ├── notesitemwidget.h/cpp
+│           ├── notesmanager.h/cpp
+│           ├── notesreminder.h/cpp
+│           ├── notessettingspanel.h/cpp
+│           └── notesdatatypes.h
 │
 ├── CMakeLists.txt                   # 构建配置
 └── README.md
@@ -193,21 +244,21 @@ kitools/
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      表现层 (Presentation)                   │
-│  ┌─────────────────┐  ┌─────────────────┐                   │
-│  │TimerSettingsPanel│  │TodoSettingsPanel│                   │
-│  │  OverlayWidget   │  │DesktopTodoWidget│                   │
-│  └────────┬────────┘  └────────┬────────┘                   │
-├───────────┼─────────────────────┼────────────────────────────┤
-│           │      控制层 (Controller)      │                   │
-│  ┌────────┴─────────┐  ┌────────┴────────┐                   │
-│  │ TimerController  │  │  TodoController │                   │
-│  └────────┬─────────┘  └────────┬────────┘                   │
-├───────────┼─────────────────────┼────────────────────────────┤
-│           │       业务层 (Business)        │                  │
-│  ┌────────┴─────────┐  ┌────────┴────────┐                   │
-│  │ SettingsManager  │  │   TaskManager   │                   │
-│  │     (单例)       │  │   LogManager    │                   │
-│  └──────────────────┘  └─────────────────┘                   │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐    │
+│  │TimerSettings  │  │TodoSettings   │  │NotesSettings  │    │
+│  │ OverlayWidget │  │DesktopTodo    │  │NotesItemWidget│    │
+│  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘    │
+├──────────┼──────────────────┼──────────────────┼────────────┤
+│          │      控制层 (Controller)           │             │
+│  ┌───────┴───────┐  ┌───────┴───────┐  ┌───────┴───────┐    │
+│  │TimerController│  │TodoController │  │NotesController│    │
+│  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘    │
+├──────────┼──────────────────┼──────────────────┼────────────┤
+│          │       业务层 (Business)            │             │
+│  ┌───────┴───────┐  ┌───────┴───────┐  ┌───────┴───────┐    │
+│  │SettingsManager│  │ TaskManager   │  │ NotesManager  │    │
+│  │    (单例)     │  │ LogManager    │  │ NotesReminder │    │
+│  └───────────────┘  └───────────────┘  └───────────────┘    │
 ├─────────────────────────────────────────────────────────────┤
 │                      核心框架 (Core)                         │
 │  ┌──────────────────────────────────────────────────────┐   │
@@ -225,8 +276,10 @@ kitools/
 Module/
 ├── xxxcontroller.h/cpp     # 控制器 - 协调各组件
 ├── xxxwidget.h/cpp         # 主界面组件 - 用户交互
+├── xxxitemwidget.h/cpp     # 列表项组件 - 单项展示
 ├── xxxsettingspanel.h/cpp  # 设置面板 - 配置管理
 ├── xxxmanager.h/cpp        # 业务管理器 - 数据处理
+├── xxxreminder.h/cpp       # 提醒管理器 - 定时提醒
 └── xxxdatatypes.h          # 数据类型定义
 ```
 
@@ -256,6 +309,8 @@ private:
 - `SettingsManager` - 计时器设置管理
 - `TaskManager` - 任务数据管理
 - `LogManager` - 日志管理
+- `NotesManager` - 便签数据管理
+- `NotesReminder` - 便签提醒管理
 
 #### 观察者模式 (Observer)
 
@@ -270,9 +325,9 @@ connect(taskManager, &TaskManager::taskAdded,
 
 | 角色 | 组件 | 职责 |
 |------|------|------|
-| Model | TaskManager, LogManager | 数据管理和业务逻辑 |
-| View | DesktopTodoWidget, TaskItemWidget | 界面展示 |
-| Controller | TodoController | 协调Model和View |
+| Model | TaskManager, NotesManager | 数据管理和业务逻辑 |
+| View | DesktopTodoWidget, NotesItemWidget | 界面展示 |
+| Controller | TodoController, NotesController | 协调Model和View |
 
 ### 4.2 数据持久化
 
@@ -281,6 +336,7 @@ connect(taskManager, &TaskManager::taskAdded,
 | 计时器设置 | INI | `%AppData%/Local/PCProductivityToolbox/settings.ini` |
 | 任务数据 | JSON | `%AppData%/Local/PCProductivityToolbox/tasks.json` |
 | 日志数据 | JSON | `%AppData%/Local/PCProductivityToolbox/logs.json` |
+| 便签数据 | JSON | `%AppData%/Local/PCProductivityToolbox/notes.json` |
 
 ### 4.3 平台适配
 
@@ -311,6 +367,10 @@ SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
 | 桌面待办事项 | 完成度评分 | ✅ 完成 |
 | 桌面待办事项 | 日志记录与导出 | ✅ 完成 |
 | 桌面待办事项 | 深色模式 | ✅ 完成 |
+| 桌面便签 | 独立窗口/可拖动 | ✅ 完成 |
+| 桌面便签 | Markdown渲染 | ✅ 完成 |
+| 桌面便签 | 颜色分类 | ✅ 完成 |
+| 桌面便签 | 提醒功能/正反色闪烁 | ✅ 完成 |
 | 系统托盘 | 最小化到托盘 | ✅ 完成 |
 | 系统托盘 | 托盘菜单 | ✅ 完成 |
 
@@ -321,14 +381,16 @@ SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
 3. **信号槽机制**：松耦合的组件通信
 4. **数据持久化**：JSON格式存储，易于读取和备份
 5. **平台适配**：利用Windows原生API实现窗口置顶
+6. **Markdown渲染**：自定义渲染引擎，支持常用语法
+7. **独立窗口便签**：实现便签墙效果，自由布局
 
 ### 5.3 代码统计
 
 | 类型 | 数量 |
 |------|------|
-| C++ 头文件 | 12 个 |
-| C++ 源文件 | 13 个 |
-| 总代码行数 | ~3000 行 |
+| C++ 头文件 | 19 个 |
+| C++ 源文件 | 20 个 |
+| 总代码行数 | ~4500 行 |
 
 ---
 
@@ -338,7 +400,6 @@ SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
 
 | 模块 | 功能描述 |
 |------|---------|
-| 桌面便签工具 | 置顶便签，快速记录临时信息 |
 | 剪贴板历史管理 | 记录剪贴板历史，快速检索粘贴 |
 | 快捷启动器 | 快速启动应用、文件、网址 |
 
