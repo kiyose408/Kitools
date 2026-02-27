@@ -11,6 +11,7 @@
 
 class TimerController;
 class TodoController;
+class NotesController;
 
 class MainWindow : public QMainWindow
 {
@@ -27,6 +28,7 @@ protected:
 private slots:
     void onTimerModuleClicked();
     void onTodoModuleClicked();
+    void onNotesModuleClicked();
     void onBackToHome();
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
     void onShowWindow();
@@ -42,12 +44,16 @@ private:
     QStackedWidget *m_stackedWidget;
     QPushButton *m_timerModuleBtn;
     QPushButton *m_todoModuleBtn;
+    QPushButton *m_notesModuleBtn;
     
     TimerController *m_timerController;
     QWidget *m_timerPanel;
     
     TodoController *m_todoController;
     QWidget *m_todoPanel;
+    
+    NotesController *m_notesController;
+    QWidget *m_notesPanel;
     
     QSystemTrayIcon *m_trayIcon;
     QMenu *m_trayMenu;

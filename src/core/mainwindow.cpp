@@ -3,6 +3,8 @@
 #include "modules/timer/timersettingspanel.h"
 #include "modules/todo/todocontroller.h"
 #include "modules/todo/todosettingspanel.h"
+#include "modules/notes/notescontroller.h"
+#include "modules/notes/notessettingspanel.h"
 #include <QLabel>
 #include <QScrollArea>
 #include <QApplication>
@@ -14,10 +16,13 @@ MainWindow::MainWindow(QWidget *parent)
     , m_stackedWidget(nullptr)
     , m_timerModuleBtn(nullptr)
     , m_todoModuleBtn(nullptr)
+    , m_notesModuleBtn(nullptr)
     , m_timerController(nullptr)
     , m_timerPanel(nullptr)
     , m_todoController(nullptr)
     , m_todoPanel(nullptr)
+    , m_notesController(nullptr)
+    , m_notesPanel(nullptr)
     , m_trayIcon(nullptr)
     , m_trayMenu(nullptr)
     , m_showAction(nullptr)
@@ -99,6 +104,26 @@ void MainWindow::setupUi()
     m_todoModuleBtn->setCursor(Qt::PointingHandCursor);
     homeLayout->addWidget(m_todoModuleBtn);
 
+    m_notesModuleBtn = new QPushButton("📝 桌面便签", m_homeWidget);
+    m_notesModuleBtn->setStyleSheet(
+        "QPushButton {"
+        "  background-color: #e67e22;"
+        "  color: white;"
+        "  border: none;"
+        "  padding: 20px;"
+        "  font-size: 16px;"
+        "  border-radius: 8px;"
+        "}"
+        "QPushButton:hover {"
+        "  background-color: #d35400;"
+        "}"
+        "QPushButton:pressed {"
+        "  background-color: #ba4a00;"
+        "}"
+    );
+    m_notesModuleBtn->setCursor(Qt::PointingHandCursor);
+    homeLayout->addWidget(m_notesModuleBtn);
+
     homeLayout->addStretch();
 
     m_stackedWidget->addWidget(m_homeWidget);
@@ -111,6 +136,10 @@ void MainWindow::setupUi()
     m_todoPanel = m_todoController->settingsPanel();
     m_stackedWidget->addWidget(m_todoPanel);
 
+    m_notesController = new NotesController(this);
+    m_notesPanel = m_notesController->settingsPanel();
+    m_stackedWidget->addWidget(m_notesPanel);
+
     m_stackedWidget->setCurrentWidget(m_homeWidget);
 }
 
@@ -118,6 +147,7 @@ void MainWindow::setupConnections()
 {
     connect(m_timerModuleBtn, &QPushButton::clicked, this, &MainWindow::onTimerModuleClicked);
     connect(m_todoModuleBtn, &QPushButton::clicked, this, &MainWindow::onTodoModuleClicked);
+    connect(m_notesModuleBtn, &QPushButton::clicked, this, &MainWindow::onNotesModuleClicked);
     
     TimerSettingsPanel *timerPanel = qobject_cast<TimerSettingsPanel*>(m_timerPanel);
     if (timerPanel) {
@@ -127,6 +157,11 @@ void MainWindow::setupConnections()
     TodoSettingsPanel *todoPanel = qobject_cast<TodoSettingsPanel*>(m_todoPanel);
     if (todoPanel) {
         connect(todoPanel, &TodoSettingsPanel::backClicked, this, &MainWindow::onBackToHome);
+    }
+    
+    NotesSettingsPanel *notesPanel = qobject_cast<NotesSettingsPanel*>(m_notesPanel);
+    if (notesPanel) {
+        connect(notesPanel, &NotesSettingsPanel::backClicked, this, &MainWindow::onBackToHome);
     }
 }
 
@@ -212,6 +247,12 @@ void MainWindow::onTodoModuleClicked()
 {
     m_stackedWidget->setCurrentWidget(m_todoPanel);
     m_todoController->showTodoWidget();
+}
+
+void MainWindow::onNotesModuleClicked()
+{
+    m_stackedWidget->setCurrentWidget(m_notesPanel);
+    m_notesController->showAllNotes();
 }
 
 void MainWindow::onBackToHome()

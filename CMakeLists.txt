@@ -40,6 +40,19 @@ set(SOURCES
     src/modules/todo/todosettingspanel.cpp
     src/modules/todo/todosettingspanel.h
     src/modules/todo/tododatatypes.h
+    src/modules/notes/notescontroller.cpp
+    src/modules/notes/notescontroller.h
+    src/modules/notes/noteswidget.cpp
+    src/modules/notes/noteswidget.h
+    src/modules/notes/notesitemwidget.cpp
+    src/modules/notes/notesitemwidget.h
+    src/modules/notes/notesmanager.cpp
+    src/modules/notes/notesmanager.h
+    src/modules/notes/notesreminder.cpp
+    src/modules/notes/notesreminder.h
+    src/modules/notes/notessettingspanel.cpp
+    src/modules/notes/notessettingspanel.h
+    src/modules/notes/notesdatatypes.h
 )
 
 set(HEADERS
@@ -55,6 +68,13 @@ set(HEADERS
     src/modules/todo/logmanager.h
     src/modules/todo/todosettingspanel.h
     src/modules/todo/tododatatypes.h
+    src/modules/notes/notescontroller.h
+    src/modules/notes/noteswidget.h
+    src/modules/notes/notesitemwidget.h
+    src/modules/notes/notesmanager.h
+    src/modules/notes/notesreminder.h
+    src/modules/notes/notessettingspanel.h
+    src/modules/notes/notesdatatypes.h
 )
 
 set(RESOURCES
@@ -74,6 +94,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/timer
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/todo
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/notes
 )
 
 if(WIN32)
