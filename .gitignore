@@ -10,6 +10,9 @@ Makefile
 *.cmake
 !CMakeLists.txt
 
+# Release packages
+release/
+
 # Qt generated files
 moc_*.cpp
 moc_*.h
