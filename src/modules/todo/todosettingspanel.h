@@ -5,7 +5,6 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QLabel>
-#include <QSlider>
 #include <QColor>
 
 class DesktopTodoWidget;
@@ -35,7 +34,7 @@ private slots:
     void onClearLogsClicked();
     void onBackClicked();
     void onBackgroundColorClicked();
-    void onBackgroundOpacityChanged(int value);
+    void onDarkModeToggled(bool checked);
     void onFontChanged(int index);
 
 private:
@@ -57,11 +56,11 @@ private:
     QLabel *m_logCountLabel;
     
     QPushButton *m_bgColorBtn;
-    QSlider *m_bgOpacitySlider;
-    QLabel *m_bgOpacityLabel;
+    QPushButton *m_darkModeBtn;
     QComboBox *m_fontCombo;
     
     QColor m_backgroundColor;
+    bool m_isDarkMode;
 };
 
 #endif

@@ -25,10 +25,10 @@ TodoSettingsPanel::TodoSettingsPanel(QWidget *parent)
     , m_statsLabel(nullptr)
     , m_logCountLabel(nullptr)
     , m_bgColorBtn(nullptr)
-    , m_bgOpacitySlider(nullptr)
-    , m_bgOpacityLabel(nullptr)
+    , m_darkModeBtn(nullptr)
     , m_fontCombo(nullptr)
     , m_backgroundColor(255, 255, 255)
+    , m_isDarkMode(false)
 {
     setupUi();
     setupConnections();
@@ -101,17 +101,17 @@ void TodoSettingsPanel::setupUi()
     m_bgColorBtn->setStyleSheet(QString("background-color: %1; border: 1px solid #ccc; border-radius: 3px;").arg(m_backgroundColor.name()));
     appearanceLayout->addWidget(m_bgColorBtn, 0, 1);
     
-    appearanceLayout->addWidget(new QLabel("背景透明度:", this), 1, 0);
-    QHBoxLayout *opacityLayout = new QHBoxLayout();
-    m_bgOpacitySlider = new QSlider(Qt::Horizontal, this);
-    m_bgOpacitySlider->setRange(0, 255);
-    m_bgOpacitySlider->setValue(230);
-    m_bgOpacitySlider->setFixedWidth(100);
-    opacityLayout->addWidget(m_bgOpacitySlider);
-    m_bgOpacityLabel = new QLabel("230", this);
-    m_bgOpacityLabel->setFixedWidth(30);
-    opacityLayout->addWidget(m_bgOpacityLabel);
-    appearanceLayout->addLayout(opacityLayout, 1, 1);
+    appearanceLayout->addWidget(new QLabel("深色模式:", this), 1, 0);
+    m_darkModeBtn = new QPushButton("关闭", this);
+    m_darkModeBtn->setCheckable(true);
+    m_darkModeBtn->setStyleSheet(
+        "QPushButton { background-color: #bdc3c7; color: #2c3e50; border: none; padding: 5px 15px; "
+        "font-size: 12px; border-radius: 3px; min-width: 60px; }"
+        "QPushButton:checked { background-color: #2c3e50; color: white; }"
+        "QPushButton:hover { background-color: #95a5a6; }"
+        "QPushButton:checked:hover { background-color: #1a252f; }"
+    );
+    appearanceLayout->addWidget(m_darkModeBtn, 1, 1);
     
     appearanceLayout->addWidget(new QLabel("字体:", this), 2, 0);
     m_fontCombo = new QComboBox(this);
@@ -195,7 +195,7 @@ void TodoSettingsPanel::setupConnections()
     connect(m_clearLogsBtn, &QPushButton::clicked, this, &TodoSettingsPanel::onClearLogsClicked);
     connect(m_backBtn, &QPushButton::clicked, this, &TodoSettingsPanel::onBackClicked);
     connect(m_bgColorBtn, &QPushButton::clicked, this, &TodoSettingsPanel::onBackgroundColorClicked);
-    connect(m_bgOpacitySlider, &QSlider::valueChanged, this, &TodoSettingsPanel::onBackgroundOpacityChanged);
+    connect(m_darkModeBtn, &QPushButton::toggled, this, &TodoSettingsPanel::onDarkModeToggled);
     connect(m_fontCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TodoSettingsPanel::onFontChanged);
     
     LogManager *lm = LogManager::instance();
@@ -319,11 +319,12 @@ void TodoSettingsPanel::onBackgroundColorClicked()
     }
 }
 
-void TodoSettingsPanel::onBackgroundOpacityChanged(int value)
+void TodoSettingsPanel::onDarkModeToggled(bool checked)
 {
-    m_bgOpacityLabel->setText(QString::number(value));
+    m_isDarkMode = checked;
+    m_darkModeBtn->setText(checked ? "开启" : "关闭");
     if (m_todoWidget) {
-        m_todoWidget->setBackgroundOpacity(value);
+        m_todoWidget->setDarkMode(checked);
     }
 }
 

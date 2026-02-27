@@ -122,3 +122,4 @@ conan/
 Testing/
 CTestTestfile.cmake
 *.rar
+CMakeLists.txt.user

@@ -34,8 +34,8 @@ public:
     void setBackgroundColor(const QColor &color);
     QColor backgroundColor() const { return m_backgroundColor; }
     
-    void setBackgroundOpacity(int opacity);
-    int backgroundOpacity() const { return m_backgroundOpacity; }
+    void setDarkMode(bool enabled);
+    bool isDarkMode() const { return m_isDarkMode; }
     
     void setContentFont(const QFont &font);
     QFont contentFont() const { return m_contentFont; }
@@ -107,7 +107,7 @@ private:
     bool m_isLocked;
     
     QColor m_backgroundColor;
-    int m_backgroundOpacity;
+    bool m_isDarkMode;
     QFont m_contentFont;
     
     QTimer *m_stayOnTopTimer;

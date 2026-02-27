@@ -31,7 +31,7 @@ DesktopTodoWidget::DesktopTodoWidget(QWidget *parent)
     , m_isDragging(false)
     , m_isLocked(false)
     , m_backgroundColor(255, 255, 255)
-    , m_backgroundOpacity(230)
+    , m_isDarkMode(false)
     , m_contentFont()
     , m_stayOnTopTimer(nullptr)
 {
@@ -212,14 +212,13 @@ void DesktopTodoWidget::setBackgroundColor(const QColor &color)
     update();
 }
 
-void DesktopTodoWidget::setBackgroundOpacity(int opacity)
+void DesktopTodoWidget::setDarkMode(bool enabled)
 {
-    m_backgroundOpacity = opacity;
+    m_isDarkMode = enabled;
+    applyStyleSheet();
     
-    if (opacity == 0) {
-        setAttribute(Qt::WA_TranslucentBackground, true);
-    } else {
-        setAttribute(Qt::WA_TranslucentBackground, false);
+    for (auto it = m_taskWidgets.begin(); it != m_taskWidgets.end(); ++it) {
+        it.value()->setDarkMode(enabled);
     }
     
     update();
@@ -246,12 +245,6 @@ void DesktopTodoWidget::applyWindowFlags()
     }
     
     setWindowFlags(flags);
-    
-    if (m_backgroundOpacity == 0) {
-        setAttribute(Qt::WA_TranslucentBackground, true);
-    } else {
-        setAttribute(Qt::WA_TranslucentBackground, false);
-    }
 }
 
 void DesktopTodoWidget::applyStyleSheet()
@@ -263,6 +256,14 @@ void DesktopTodoWidget::applyStyleSheet()
         fontStr = QString("font-family: '%1';").arg(m_contentFont.family());
     }
     
+    QString textColor = m_isDarkMode ? "#ecf0f1" : "#2c3e50";
+    QString inputBg = m_isDarkMode ? "rgba(52,73,94,230)" : "rgba(255,255,255,200)";
+    QString inputBorder = m_isDarkMode ? "#34495e" : "#ddd";
+    QString scrollBg = m_isDarkMode ? "rgba(44,62,80,200)" : "rgba(236,240,241,200)";
+    QString scrollHandle = m_isDarkMode ? "#5d6d7e" : "#bdc3c7";
+    QString scrollHandleHover = m_isDarkMode ? "#85929e" : "#95a5a6";
+    QString countColor = m_isDarkMode ? "#95a5a6" : "#7f8c8d";
+    
     setStyleSheet(QString(
         "DesktopTodoWidget { background: transparent; }"
         "QLabel { background: transparent; %1 }"
@@ -270,24 +271,24 @@ void DesktopTodoWidget::applyStyleSheet()
     ).arg(fontStr));
     
     m_dateLabel->setStyleSheet(QString(
-        "QLabel { background: transparent; font-size: 16px; font-weight: bold; color: #2c3e50; padding: 5px; %1 }"
-    ).arg(fontStr));
+        "QLabel { background: transparent; font-size: 16px; font-weight: bold; color: %2; padding: 5px; %1 }"
+    ).arg(fontStr).arg(textColor));
     
     m_taskInput->setStyleSheet(QString(
-        "QLineEdit { padding: 8px; border: 1px solid #ddd; border-radius: 5px; background: rgba(255,255,255,200); %1 font-size: 13px; }"
+        "QLineEdit { padding: 8px; border: 1px solid %3; border-radius: 5px; background: %2; color: %4; %1 font-size: 13px; }"
         "QLineEdit:focus { border-color: #9b59b6; }"
-    ).arg(fontStr));
+    ).arg(fontStr).arg(inputBg).arg(inputBorder).arg(textColor));
     
     m_scrollArea->setStyleSheet(QString(
-        "QScrollArea { background: transparent; border: 1px solid #ddd; border-radius: 5px; }"
-        "QScrollBar:vertical { width: 8px; background: rgba(236,240,241,200); }"
-        "QScrollBar::handle:vertical { background: #bdc3c7; border-radius: 4px; min-height: 20px; }"
-        "QScrollBar::handle:vertical:hover { background: #95a5a6; }"
-    ));
+        "QScrollArea { background: transparent; border: 1px solid %2; border-radius: 5px; }"
+        "QScrollBar:vertical { width: 8px; background: %3; }"
+        "QScrollBar::handle:vertical { background: %4; border-radius: 4px; min-height: 20px; }"
+        "QScrollBar::handle:vertical:hover { background: %5; }"
+    ).arg(fontStr).arg(inputBorder).arg(scrollBg).arg(scrollHandle).arg(scrollHandleHover));
     
     m_taskContainer->setStyleSheet("QWidget { background: transparent; }");
     
-    m_countLabel->setStyleSheet(QString("background: transparent; color: #7f8c8d; font-size: 12px; %1").arg(fontStr));
+    m_countLabel->setStyleSheet(QString("background: transparent; color: %2; font-size: 12px; %1").arg(fontStr).arg(countColor));
 }
 
 void DesktopTodoWidget::updatePinButtonStyle()
@@ -492,15 +493,18 @@ void DesktopTodoWidget::onTaskEditRequested(int taskId, const QString &newText)
 
 void DesktopTodoWidget::paintEvent(QPaintEvent *event)
 {
-    if (m_backgroundOpacity > 0) {
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing);
-        
-        QColor bgColor = m_backgroundColor;
-        bgColor.setAlpha(m_backgroundOpacity);
-        
-        painter.fillRect(rect(), bgColor);
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    
+    QColor bgColor;
+    if (m_isDarkMode) {
+        bgColor = QColor(44, 62, 80, 230);
+    } else {
+        bgColor = m_backgroundColor;
+        bgColor.setAlpha(230);
     }
+    
+    painter.fillRect(rect(), bgColor);
     
     QWidget::paintEvent(event);
 }

@@ -8,6 +8,7 @@ TaskItemWidget::TaskItemWidget(const TaskData &task, QWidget *parent)
     , m_score(task.completionScore)
     , m_editMode(false)
     , m_lastEmittedScore(task.completionScore)
+    , m_isDarkMode(false)
     , m_checkBox(nullptr)
     , m_descriptionLabel(nullptr)
     , m_editLineEdit(nullptr)
@@ -84,11 +85,6 @@ void TaskItemWidget::setupUi()
     );
     connect(m_deleteBtn, &QPushButton::clicked, this, &TaskItemWidget::onDeleteClicked);
     layout->addWidget(m_deleteBtn);
-    
-    setStyleSheet(
-        "TaskItemWidget { background-color: rgba(255,255,255,180); border-radius: 5px; margin: 2px; }"
-        "TaskItemWidget:hover { background-color: rgba(248,249,250,220); }"
-    );
 }
 
 void TaskItemWidget::setTaskData(const TaskData &task)
@@ -132,13 +128,29 @@ void TaskItemWidget::setEditMode(bool editMode)
 
 void TaskItemWidget::updateAppearance()
 {
+    QString completedColor = m_isDarkMode ? "#7f8c8d" : "#95a5a6";
+    QString normalColor = m_isDarkMode ? "#ecf0f1" : "#2c3e50";
+    QString bgColor = m_isDarkMode ? "rgba(52,73,94,180)" : "rgba(255,255,255,180)";
+    QString hoverBgColor = m_isDarkMode ? "rgba(62,83,104,220)" : "rgba(248,249,250,220)";
+    
     if (m_isCompleted) {
-        m_descriptionLabel->setStyleSheet("color: #95a5a6; text-decoration: line-through;");
+        m_descriptionLabel->setStyleSheet(QString("color: %1; text-decoration: line-through;").arg(completedColor));
         m_scoreWidget->show();
     } else {
-        m_descriptionLabel->setStyleSheet("color: #2c3e50;");
+        m_descriptionLabel->setStyleSheet(QString("color: %1;").arg(normalColor));
         m_scoreWidget->hide();
     }
+    
+    setStyleSheet(QString(
+        "TaskItemWidget { background-color: %1; border-radius: 5px; margin: 2px; }"
+        "TaskItemWidget:hover { background-color: %2; }"
+    ).arg(bgColor).arg(hoverBgColor));
+}
+
+void TaskItemWidget::setDarkMode(bool enabled)
+{
+    m_isDarkMode = enabled;
+    updateAppearance();
 }
 
 void TaskItemWidget::onCheckBoxToggled(bool checked)

@@ -21,6 +21,7 @@ public:
     int taskId() const { return m_taskId; }
     void setTaskData(const TaskData &task);
     void setEditMode(bool editMode);
+    void setDarkMode(bool enabled);
 
 signals:
     void completedChanged(int taskId, bool completed);
@@ -46,6 +47,7 @@ private:
     int m_score;
     bool m_editMode;
     int m_lastEmittedScore;
+    bool m_isDarkMode;
     
     QCheckBox *m_checkBox;
     QLabel *m_descriptionLabel;
