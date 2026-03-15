@@ -53,6 +53,18 @@ set(SOURCES
     src/modules/notes/notessettingspanel.cpp
     src/modules/notes/notessettingspanel.h
     src/modules/notes/notesdatatypes.h
+    src/modules/clipboard/clipboardcontroller.cpp
+    src/modules/clipboard/clipboardcontroller.h
+    src/modules/clipboard/clipboardwidget.cpp
+    src/modules/clipboard/clipboardwidget.h
+    src/modules/clipboard/clipboarditemwidget.cpp
+    src/modules/clipboard/clipboarditemwidget.h
+    src/modules/clipboard/clipboardmanager.cpp
+    src/modules/clipboard/clipboardmanager.h
+    src/modules/clipboard/clipboardsettingspanel.cpp
+    src/modules/clipboard/clipboardsettingspanel.h
+    src/modules/clipboard/clipboarddatatypes.h
+    src/modules/clipboard/clipboarddatatypes.cpp
 )
 
 set(HEADERS
@@ -75,6 +87,12 @@ set(HEADERS
     src/modules/notes/notesreminder.h
     src/modules/notes/notessettingspanel.h
     src/modules/notes/notesdatatypes.h
+    src/modules/clipboard/clipboardcontroller.h
+    src/modules/clipboard/clipboardwidget.h
+    src/modules/clipboard/clipboarditemwidget.h
+    src/modules/clipboard/clipboardmanager.h
+    src/modules/clipboard/clipboardsettingspanel.h
+    src/modules/clipboard/clipboarddatatypes.h
 )
 
 set(RESOURCES
@@ -95,6 +113,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/timer
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/todo
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/notes
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/clipboard
 )
 
 if(WIN32)

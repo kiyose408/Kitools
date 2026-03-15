@@ -5,10 +5,13 @@
 #include "modules/todo/todosettingspanel.h"
 #include "modules/notes/notescontroller.h"
 #include "modules/notes/notessettingspanel.h"
+#include "modules/clipboard/clipboardcontroller.h"
+#include "modules/clipboard/clipboardsettingspanel.h"
 #include <QLabel>
 #include <QScrollArea>
 #include <QApplication>
 #include <QStyle>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -23,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_todoPanel(nullptr)
     , m_notesController(nullptr)
     , m_notesPanel(nullptr)
+    , m_clipboardController(nullptr)
+    , m_clipboardPanel(nullptr)
     , m_trayIcon(nullptr)
     , m_trayMenu(nullptr)
     , m_showAction(nullptr)
@@ -124,6 +129,34 @@ void MainWindow::setupUi()
     m_notesModuleBtn->setCursor(Qt::PointingHandCursor);
     homeLayout->addWidget(m_notesModuleBtn);
 
+    m_clipboardModuleBtn = new QPushButton("📋 剪贴板历史", m_homeWidget);
+    m_clipboardModuleBtn->setStyleSheet(
+        "QPushButton {"
+        "  background-color: #27ae60;"
+        "  color: white;"
+        "  border: none;"
+        "  padding: 20px;"
+        "  font-size: 16px;"
+        "  border-radius: 8px;"
+        "}"
+        "QPushButton:hover {"
+        "  background-color: #229954;"
+        "}"
+        "QPushButton:pressed {"
+        "  background-color: #1e8449;"
+        "}"
+    );
+    m_clipboardModuleBtn->setCursor(Qt::PointingHandCursor);
+    homeLayout->addWidget(m_clipboardModuleBtn);
+
+    m_notesController = new NotesController(this);
+    m_notesPanel = m_notesController->settingsPanel();
+    m_stackedWidget->addWidget(m_notesPanel);
+
+    m_clipboardController = new ClipboardController(this);
+    m_clipboardPanel = m_clipboardController->getSettingsPanel();
+    m_stackedWidget->addWidget(m_clipboardPanel);
+
     homeLayout->addStretch();
 
     m_stackedWidget->addWidget(m_homeWidget);
@@ -136,19 +169,18 @@ void MainWindow::setupUi()
     m_todoPanel = m_todoController->settingsPanel();
     m_stackedWidget->addWidget(m_todoPanel);
 
-    m_notesController = new NotesController(this);
-    m_notesPanel = m_notesController->settingsPanel();
-    m_stackedWidget->addWidget(m_notesPanel);
-
     m_stackedWidget->setCurrentWidget(m_homeWidget);
 }
 
 void MainWindow::setupConnections()
 {
+    qDebug() << "Setting up connections...";
     connect(m_timerModuleBtn, &QPushButton::clicked, this, &MainWindow::onTimerModuleClicked);
     connect(m_todoModuleBtn, &QPushButton::clicked, this, &MainWindow::onTodoModuleClicked);
     connect(m_notesModuleBtn, &QPushButton::clicked, this, &MainWindow::onNotesModuleClicked);
-    
+    connect(m_clipboardModuleBtn, &QPushButton::clicked, this, &MainWindow::onClipboardModuleClicked);
+    qDebug() << "Button connections done. clipboardBtn:" << m_clipboardModuleBtn;
+
     TimerSettingsPanel *timerPanel = qobject_cast<TimerSettingsPanel*>(m_timerPanel);
     if (timerPanel) {
         connect(timerPanel, &TimerSettingsPanel::backClicked, this, &MainWindow::onBackToHome);
@@ -162,6 +194,11 @@ void MainWindow::setupConnections()
     NotesSettingsPanel *notesPanel = qobject_cast<NotesSettingsPanel*>(m_notesPanel);
     if (notesPanel) {
         connect(notesPanel, &NotesSettingsPanel::backClicked, this, &MainWindow::onBackToHome);
+    }
+
+    ClipboardSettingsPanel *clipboardPanel = qobject_cast<ClipboardSettingsPanel*>(m_clipboardPanel);
+    if (clipboardPanel) {
+        connect(clipboardPanel, &ClipboardSettingsPanel::backRequested, this, &MainWindow::onBackToHome);
     }
 }
 
@@ -253,6 +290,13 @@ void MainWindow::onNotesModuleClicked()
 {
     m_stackedWidget->setCurrentWidget(m_notesPanel);
     m_notesController->showAllNotes();
+}
+
+void MainWindow::onClipboardModuleClicked()
+{
+    qDebug() << "剪贴板模块被点击";
+    m_stackedWidget->setCurrentWidget(m_clipboardPanel);
+    qDebug() << "当前窗口已切换到剪贴板面板";
 }
 
 void MainWindow::onBackToHome()
