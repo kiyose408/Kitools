@@ -19,6 +19,8 @@ set(SOURCES
     src/main.cpp
     src/core/mainwindow.cpp
     src/core/mainwindow.h
+    src/core/globalshortcutmanager.cpp
+    src/core/globalshortcutmanager.h
     src/modules/timer/timercontroller.cpp
     src/modules/timer/timercontroller.h
     src/modules/timer/overlaywidget.cpp
@@ -76,6 +78,7 @@ set(SOURCES
 
 set(HEADERS
     src/core/mainwindow.h
+    src/core/globalshortcutmanager.h
     src/modules/timer/timercontroller.h
     src/modules/timer/overlaywidget.h
     src/modules/timer/timersettingspanel.h

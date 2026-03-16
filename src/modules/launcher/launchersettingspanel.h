@@ -9,6 +9,8 @@
 #include <QGroupBox>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QComboBox>
+#include <QTabWidget>
 
 #include "launcherindexer.h"
 
@@ -26,6 +28,7 @@ signals:
 private slots:
     void onRefreshClicked();
     void onSearchChanged(const QString& text);
+    void onCategoryChanged(int index);
     void onItemDoubleClicked(QListWidgetItem* item);
     void onIndexingFinished(int totalCount);
 
@@ -33,12 +36,15 @@ private:
     void setupUI();
     void loadItems();
     void updateStats();
+    QString getCurrentCategory() const;
 
     LauncherIndexer* m_indexer;
     QLineEdit* m_searchEdit;
+    QComboBox* m_categoryCombo;
     QListWidget* m_itemsList;
     QLabel* m_statsLabel;
     QPushButton* m_refreshBtn;
+    QString m_currentCategory;
 };
 
 #endif
