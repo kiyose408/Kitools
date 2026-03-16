@@ -7,6 +7,8 @@
 #include "modules/notes/notessettingspanel.h"
 #include "modules/clipboard/clipboardcontroller.h"
 #include "modules/clipboard/clipboardsettingspanel.h"
+#include "modules/launcher/launchercontroller.h"
+#include "modules/launcher/launchersettingspanel.h"
 #include <QLabel>
 #include <QScrollArea>
 #include <QApplication>
@@ -20,6 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_timerModuleBtn(nullptr)
     , m_todoModuleBtn(nullptr)
     , m_notesModuleBtn(nullptr)
+    , m_clipboardModuleBtn(nullptr)
+    , m_launcherModuleBtn(nullptr)
     , m_timerController(nullptr)
     , m_timerPanel(nullptr)
     , m_todoController(nullptr)
@@ -28,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_notesPanel(nullptr)
     , m_clipboardController(nullptr)
     , m_clipboardPanel(nullptr)
+    , m_launcherController(nullptr)
+    , m_launcherPanel(nullptr)
     , m_trayIcon(nullptr)
     , m_trayMenu(nullptr)
     , m_showAction(nullptr)
@@ -149,6 +155,26 @@ void MainWindow::setupUi()
     m_clipboardModuleBtn->setCursor(Qt::PointingHandCursor);
     homeLayout->addWidget(m_clipboardModuleBtn);
 
+    m_launcherModuleBtn = new QPushButton("🚀 快捷启动器", m_homeWidget);
+    m_launcherModuleBtn->setStyleSheet(
+        "QPushButton {"
+        "  background-color: #e74c3c;"
+        "  color: white;"
+        "  border: none;"
+        "  padding: 20px;"
+        "  font-size: 16px;"
+        "  border-radius: 8px;"
+        "}"
+        "QPushButton:hover {"
+        "  background-color: #c0392b;"
+        "}"
+        "QPushButton:pressed {"
+        "  background-color: #a93226;"
+        "}"
+    );
+    m_launcherModuleBtn->setCursor(Qt::PointingHandCursor);
+    homeLayout->addWidget(m_launcherModuleBtn);
+
     m_notesController = new NotesController(this);
     m_notesPanel = m_notesController->settingsPanel();
     m_stackedWidget->addWidget(m_notesPanel);
@@ -156,6 +182,10 @@ void MainWindow::setupUi()
     m_clipboardController = new ClipboardController(this);
     m_clipboardPanel = m_clipboardController->getSettingsPanel();
     m_stackedWidget->addWidget(m_clipboardPanel);
+
+    m_launcherController = new LauncherController(this);
+    m_launcherPanel = m_launcherController->getSettingsPanel();
+    m_stackedWidget->addWidget(m_launcherPanel);
 
     homeLayout->addStretch();
 
@@ -179,7 +209,8 @@ void MainWindow::setupConnections()
     connect(m_todoModuleBtn, &QPushButton::clicked, this, &MainWindow::onTodoModuleClicked);
     connect(m_notesModuleBtn, &QPushButton::clicked, this, &MainWindow::onNotesModuleClicked);
     connect(m_clipboardModuleBtn, &QPushButton::clicked, this, &MainWindow::onClipboardModuleClicked);
-    qDebug() << "Button connections done. clipboardBtn:" << m_clipboardModuleBtn;
+    connect(m_launcherModuleBtn, &QPushButton::clicked, this, &MainWindow::onLauncherModuleClicked);
+    qDebug() << "Button connections done.";
 
     TimerSettingsPanel *timerPanel = qobject_cast<TimerSettingsPanel*>(m_timerPanel);
     if (timerPanel) {
@@ -199,6 +230,11 @@ void MainWindow::setupConnections()
     ClipboardSettingsPanel *clipboardPanel = qobject_cast<ClipboardSettingsPanel*>(m_clipboardPanel);
     if (clipboardPanel) {
         connect(clipboardPanel, &ClipboardSettingsPanel::backRequested, this, &MainWindow::onBackToHome);
+    }
+
+    LauncherSettingsPanel *launcherPanel = qobject_cast<LauncherSettingsPanel*>(m_launcherPanel);
+    if (launcherPanel) {
+        connect(launcherPanel, &LauncherSettingsPanel::backRequested, this, &MainWindow::onBackToHome);
     }
 }
 
@@ -297,6 +333,14 @@ void MainWindow::onClipboardModuleClicked()
     qDebug() << "剪贴板模块被点击";
     m_stackedWidget->setCurrentWidget(m_clipboardPanel);
     qDebug() << "当前窗口已切换到剪贴板面板";
+}
+
+void MainWindow::onLauncherModuleClicked()
+{
+    qDebug() << "快捷启动器模块被点击";
+    m_stackedWidget->setCurrentWidget(m_launcherPanel);
+    m_launcherController->startIndexing();
+    qDebug() << "当前窗口已切换到快捷启动器面板";
 }
 
 void MainWindow::onBackToHome()

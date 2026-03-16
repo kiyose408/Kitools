@@ -65,6 +65,13 @@ set(SOURCES
     src/modules/clipboard/clipboardsettingspanel.h
     src/modules/clipboard/clipboarddatatypes.h
     src/modules/clipboard/clipboarddatatypes.cpp
+    src/modules/launcher/launchercontroller.cpp
+    src/modules/launcher/launchercontroller.h
+    src/modules/launcher/launcherindexer.cpp
+    src/modules/launcher/launcherindexer.h
+    src/modules/launcher/launchersettingspanel.cpp
+    src/modules/launcher/launchersettingspanel.h
+    src/modules/launcher/launcherdatatypes.h
 )
 
 set(HEADERS
@@ -93,6 +100,10 @@ set(HEADERS
     src/modules/clipboard/clipboardmanager.h
     src/modules/clipboard/clipboardsettingspanel.h
     src/modules/clipboard/clipboarddatatypes.h
+    src/modules/launcher/launchercontroller.h
+    src/modules/launcher/launcherindexer.h
+    src/modules/launcher/launchersettingspanel.h
+    src/modules/launcher/launcherdatatypes.h
 )
 
 set(RESOURCES
@@ -114,6 +125,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/todo
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/notes
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/clipboard
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/launcher
 )
 
 if(WIN32)
