@@ -67,13 +67,22 @@ set(SOURCES
     src/modules/clipboard/clipboardsettingspanel.h
     src/modules/clipboard/clipboarddatatypes.h
     src/modules/clipboard/clipboarddatatypes.cpp
-    src/modules/launcher/launchercontroller.cpp
-    src/modules/launcher/launchercontroller.h
+    src/modules/launcher/launcherdatatypes.h
     src/modules/launcher/launcherindexer.cpp
     src/modules/launcher/launcherindexer.h
     src/modules/launcher/launchersettingspanel.cpp
     src/modules/launcher/launchersettingspanel.h
-    src/modules/launcher/launcherdatatypes.h
+    src/modules/launcher/launchercontroller.cpp
+    src/modules/launcher/launchercontroller.h
+    src/modules/timetracker/timetrackerdatatypes.h
+    src/modules/timetracker/windowmonitor.cpp
+    src/modules/timetracker/windowmonitor.h
+    src/modules/timetracker/activitymanager.cpp
+    src/modules/timetracker/activitymanager.h
+    src/modules/timetracker/timetrackercontroller.cpp
+    src/modules/timetracker/timetrackercontroller.h
+    src/modules/timetracker/timetrackersettingspanel.cpp
+    src/modules/timetracker/timetrackersettingspanel.h
 )
 
 set(HEADERS
@@ -107,6 +116,11 @@ set(HEADERS
     src/modules/launcher/launcherindexer.h
     src/modules/launcher/launchersettingspanel.h
     src/modules/launcher/launcherdatatypes.h
+    src/modules/timetracker/timetrackerdatatypes.h
+    src/modules/timetracker/windowmonitor.h
+    src/modules/timetracker/activitymanager.h
+    src/modules/timetracker/timetrackercontroller.h
+    src/modules/timetracker/timetrackersettingspanel.h
 )
 
 set(RESOURCES
@@ -129,6 +143,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/notes
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/clipboard
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/launcher
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/timetracker
 )
 
 if(WIN32)
