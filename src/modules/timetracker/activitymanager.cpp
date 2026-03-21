@@ -12,14 +12,21 @@ ActivityManager::ActivityManager(QObject* parent)
     : QObject(parent)
     , m_maxRecords(100000)
 {
-    qDebug() << "ActivityManager 初始化";
+    qDebug() << "========== ActivityManager 初始化 ==========";
     
     QDir appDataDir(QCoreApplication::applicationDirPath());
     appDataDir.mkpath("data");
     m_dataFilePath = appDataDir.filePath("data/activity.json");
     
+    qDebug() << "数据文件路径:" << m_dataFilePath;
+    
     initDefaultCategoryRules();
+    qDebug() << "已初始化" << m_categoryRules.size() << "条默认分类规则";
+    
     loadFromFile();
+    qDebug() << "已加载" << m_records.size() << "条活动记录";
+    
+    qDebug() << "ActivityManager 初始化完成";
 }
 
 ActivityManager::~ActivityManager() {
@@ -34,16 +41,25 @@ ActivityManager* ActivityManager::instance(QObject* parent) {
 }
 
 void ActivityManager::addActivityRecord(const ActivityRecord& record) {
+    qDebug() << "========== 添加活动记录 ==========";
+    qDebug() << "进程:" << record.processName;
+    qDebug() << "标题:" << record.windowTitle;
+    qDebug() << "持续时间:" << record.durationSeconds << "秒";
+    
     ActivityRecord newRecord = record;
     newRecord.id = generateId();
     
     newRecord.category = categorizeActivity(newRecord);
+    qDebug() << "分类结果:" << categoryToString(newRecord.category);
     
     m_records.append(newRecord);
+    qDebug() << "记录已添加，总记录数:" << m_records.size();
     
     emit recordAdded(newRecord);
+    qDebug() << "recordAdded 信号已发送";
     
     if (m_records.size() % 100 == 0) {
+        qDebug() << "触发自动保存...";
         compressOldData();
         saveToFile();
     }
@@ -100,6 +116,14 @@ QMap<QDate, DailySummary> ActivityManager::getMonthlySummary(int year, int month
 void ActivityManager::setCategoryRule(const AppCategoryRule& rule) {
     m_categoryRules[rule.name] = rule;
     saveCategoryRules();
+}
+
+void ActivityManager::removeCategoryRule(const QString& name) {
+    if (m_categoryRules.contains(name)) {
+        m_categoryRules.remove(name);
+        saveCategoryRules();
+        qDebug() << "已删除分类规则:" << name;
+    }
 }
 
 QList<AppCategoryRule> ActivityManager::getCategoryRules() const {

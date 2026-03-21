@@ -9,6 +9,8 @@
 #include "modules/clipboard/clipboardsettingspanel.h"
 #include "modules/launcher/launchercontroller.h"
 #include "modules/launcher/launchersettingspanel.h"
+#include "modules/timetracker/timetrackercontroller.h"
+#include "modules/timetracker/timetrackersettingspanel.h"
 #include <QLabel>
 #include <QScrollArea>
 #include <QApplication>
@@ -24,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_notesModuleBtn(nullptr)
     , m_clipboardModuleBtn(nullptr)
     , m_launcherModuleBtn(nullptr)
+    , m_timeTrackerModuleBtn(nullptr)
     , m_timerController(nullptr)
     , m_timerPanel(nullptr)
     , m_todoController(nullptr)
@@ -34,6 +37,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_clipboardPanel(nullptr)
     , m_launcherController(nullptr)
     , m_launcherPanel(nullptr)
+    , m_timeTrackerController(nullptr)
+    , m_timeTrackerPanel(nullptr)
     , m_trayIcon(nullptr)
     , m_trayMenu(nullptr)
     , m_showAction(nullptr)
@@ -175,6 +180,26 @@ void MainWindow::setupUi()
     m_launcherModuleBtn->setCursor(Qt::PointingHandCursor);
     homeLayout->addWidget(m_launcherModuleBtn);
 
+    m_timeTrackerModuleBtn = new QPushButton("⏱️ 时间追踪器", m_homeWidget);
+    m_timeTrackerModuleBtn->setStyleSheet(
+        "QPushButton {"
+        "  background-color: #9b59b6;"
+        "  color: white;"
+        "  border: none;"
+        "  padding: 20px;"
+        "  font-size: 16px;"
+        "  border-radius: 8px;"
+        "}"
+        "QPushButton:hover {"
+        "  background-color: #8e44ad;"
+        "}"
+        "QPushButton:pressed {"
+        "  background-color: #7d3c98;"
+        "}"
+    );
+    m_timeTrackerModuleBtn->setCursor(Qt::PointingHandCursor);
+    homeLayout->addWidget(m_timeTrackerModuleBtn);
+
     m_notesController = new NotesController(this);
     m_notesPanel = m_notesController->settingsPanel();
     m_stackedWidget->addWidget(m_notesPanel);
@@ -186,6 +211,10 @@ void MainWindow::setupUi()
     m_launcherController = new LauncherController(this);
     m_launcherPanel = m_launcherController->getSettingsPanel();
     m_stackedWidget->addWidget(m_launcherPanel);
+
+    m_timeTrackerController = new TimeTrackerController(this);
+    m_timeTrackerPanel = m_timeTrackerController->getSettingsPanel();
+    m_stackedWidget->addWidget(m_timeTrackerPanel);
 
     homeLayout->addStretch();
 
@@ -210,6 +239,7 @@ void MainWindow::setupConnections()
     connect(m_notesModuleBtn, &QPushButton::clicked, this, &MainWindow::onNotesModuleClicked);
     connect(m_clipboardModuleBtn, &QPushButton::clicked, this, &MainWindow::onClipboardModuleClicked);
     connect(m_launcherModuleBtn, &QPushButton::clicked, this, &MainWindow::onLauncherModuleClicked);
+    connect(m_timeTrackerModuleBtn, &QPushButton::clicked, this, &MainWindow::onTimeTrackerModuleClicked);
     qDebug() << "Button connections done.";
 
     TimerSettingsPanel *timerPanel = qobject_cast<TimerSettingsPanel*>(m_timerPanel);
@@ -235,6 +265,11 @@ void MainWindow::setupConnections()
     LauncherSettingsPanel *launcherPanel = qobject_cast<LauncherSettingsPanel*>(m_launcherPanel);
     if (launcherPanel) {
         connect(launcherPanel, &LauncherSettingsPanel::backRequested, this, &MainWindow::onBackToHome);
+    }
+
+    TimeTrackerSettingsPanel *timeTrackerPanel = qobject_cast<TimeTrackerSettingsPanel*>(m_timeTrackerPanel);
+    if (timeTrackerPanel) {
+        connect(timeTrackerPanel, &TimeTrackerSettingsPanel::backRequested, this, &MainWindow::onBackToHome);
     }
 }
 
@@ -341,6 +376,13 @@ void MainWindow::onLauncherModuleClicked()
     m_stackedWidget->setCurrentWidget(m_launcherPanel);
     m_launcherController->startIndexing();
     qDebug() << "当前窗口已切换到快捷启动器面板";
+}
+
+void MainWindow::onTimeTrackerModuleClicked()
+{
+    qDebug() << "时间追踪器模块被点击";
+    m_stackedWidget->setCurrentWidget(m_timeTrackerPanel);
+    qDebug() << "当前窗口已切换到时间追踪器面板";
 }
 
 void MainWindow::onBackToHome()

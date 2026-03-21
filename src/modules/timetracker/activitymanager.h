@@ -22,6 +22,7 @@ public:
     QMap<QDate, DailySummary> getMonthlySummary(int year, int month) const;
     
     void setCategoryRule(const AppCategoryRule& rule);
+    void removeCategoryRule(const QString& name);
     QList<AppCategoryRule> getCategoryRules() const;
     
     ActivityCategory categorizeActivity(const ActivityRecord& record) const;

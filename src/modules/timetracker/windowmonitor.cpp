@@ -13,10 +13,12 @@ WindowMonitor::WindowMonitor(QObject* parent)
     , m_timer(nullptr)
     , m_isMonitoring(false)
 {
-    qDebug() << "WindowMonitor 初始化";
+    qDebug() << "========== WindowMonitor 初始化 ==========";
     
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &WindowMonitor::onTimerTick);
+    
+    qDebug() << "WindowMonitor 初始化完成";
 }
 
 WindowMonitor::~WindowMonitor() {
@@ -32,25 +34,37 @@ WindowMonitor* WindowMonitor::instance(QObject* parent) {
 
 void WindowMonitor::startMonitoring(int intervalMs) {
     if (m_isMonitoring) {
+        qDebug() << "窗口监控已经在运行中";
         return;
     }
     
-    qDebug() << "开始窗口监控，间隔:" << intervalMs << "ms";
+    qDebug() << "========== 开始窗口监控 ==========";
+    qDebug() << "监控间隔:" << intervalMs << "ms";
+    
     m_isMonitoring = true;
     m_windowStartTime = QDateTime::currentDateTime();
     m_currentWindow = getActiveWindow();
     
+    qDebug() << "初始窗口信息:";
+    qDebug() << "  进程名:" << m_currentWindow.processName;
+    qDebug() << "  窗口标题:" << m_currentWindow.windowTitle;
+    qDebug() << "  文件路径:" << m_currentWindow.filePath;
+    
     m_timer->start(intervalMs);
+    
+    qDebug() << "定时器已启动";
 }
 
 void WindowMonitor::stopMonitoring() {
     if (!m_isMonitoring) {
+        qDebug() << "窗口监控未在运行";
         return;
     }
     
-    qDebug() << "停止窗口监控";
+    qDebug() << "========== 停止窗口监控 ==========";
     m_timer->stop();
     m_isMonitoring = false;
+    qDebug() << "监控已停止";
 }
 
 bool WindowMonitor::isMonitoring() const {
@@ -68,8 +82,15 @@ WindowInfo WindowMonitor::getActiveWindow() {
 void WindowMonitor::onTimerTick() {
     WindowInfo newWindow = getForegroundWindowInfo();
     
+    qDebug() << "----------------------------------------";
+    qDebug() << "定时器触发 - 检查窗口变化";
+    qDebug() << "当前窗口:" << m_currentWindow.processName << "-" << m_currentWindow.windowTitle;
+    qDebug() << "新窗口:" << newWindow.processName << "-" << newWindow.windowTitle;
+    
     if (newWindow.processName != m_currentWindow.processName ||
         newWindow.windowTitle != m_currentWindow.windowTitle) {
+        
+        qDebug() << ">>> 检测到窗口变化! <<<";
         
         if (!m_currentWindow.processName.isEmpty()) {
             ActivityRecord record;
@@ -80,13 +101,26 @@ void WindowMonitor::onTimerTick() {
             record.endTime = QDateTime::currentDateTime();
             record.durationSeconds = m_windowStartTime.secsTo(record.endTime);
             
+            qDebug() << "生成活动记录:";
+            qDebug() << "  进程:" << record.processName;
+            qDebug() << "  标题:" << record.windowTitle;
+            qDebug() << "  开始时间:" << record.startTime.toString("yyyy-MM-dd hh:mm:ss");
+            qDebug() << "  结束时间:" << record.endTime.toString("yyyy-MM-dd hh:mm:ss");
+            qDebug() << "  持续时间:" << record.durationSeconds << "秒";
+            
             emit activityRecorded(record);
+            qDebug() << "activityRecorded 信号已发送";
         }
         
         emit windowChanged(m_currentWindow, newWindow);
+        qDebug() << "windowChanged 信号已发送";
         
         m_currentWindow = newWindow;
         m_windowStartTime = QDateTime::currentDateTime();
+        
+        qDebug() << "已更新当前窗口信息";
+    } else {
+        qDebug() << "窗口未变化，继续监控...";
     }
 }
 
@@ -96,6 +130,7 @@ WindowInfo WindowMonitor::getForegroundWindowInfo() {
 #ifdef Q_OS_WIN
     HWND hwnd = GetForegroundWindow();
     if (!hwnd) {
+        qDebug() << "获取前台窗口句柄失败";
         return info;
     }
     
@@ -110,6 +145,10 @@ WindowInfo WindowMonitor::getForegroundWindowInfo() {
         info.processName = getProcessName(processId);
         info.filePath = getProcessPath(processId);
     }
+    
+    qDebug() << "获取前台窗口信息成功:" << info.processName;
+#else
+    qDebug() << "非Windows平台，无法获取窗口信息";
 #endif
     
     return info;
@@ -137,6 +176,7 @@ QString WindowMonitor::getProcessName(DWORD processId) {
 #ifdef Q_OS_WIN
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId);
     if (!hProcess) {
+        qDebug() << "打开进程失败，PID:" << processId << "错误码:" << GetLastError();
         return QString();
     }
     
@@ -146,6 +186,7 @@ QString WindowMonitor::getProcessName(DWORD processId) {
         return QString::fromWCharArray(processName);
     }
     
+    qDebug() << "获取进程名失败，PID:" << processId << "错误码:" << GetLastError();
     CloseHandle(hProcess);
     return QString();
 #else

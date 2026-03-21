@@ -14,6 +14,7 @@ class TodoController;
 class NotesController;
 class ClipboardController;
 class LauncherController;
+class TimeTrackerController;
 
 class MainWindow : public QMainWindow
 {
@@ -33,6 +34,7 @@ private slots:
     void onNotesModuleClicked();
     void onClipboardModuleClicked();
     void onLauncherModuleClicked();
+    void onTimeTrackerModuleClicked();
     void onBackToHome();
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
     void onShowWindow();
@@ -51,6 +53,7 @@ private:
     QPushButton *m_notesModuleBtn;
     QPushButton *m_clipboardModuleBtn;
     QPushButton *m_launcherModuleBtn;
+    QPushButton *m_timeTrackerModuleBtn;
     
     TimerController *m_timerController;
     QWidget *m_timerPanel;
@@ -66,6 +69,9 @@ private:
 
     LauncherController *m_launcherController;
     QWidget *m_launcherPanel;
+
+    TimeTrackerController *m_timeTrackerController;
+    QWidget *m_timeTrackerPanel;
 
     QSystemTrayIcon *m_trayIcon;
     QMenu *m_trayMenu;
