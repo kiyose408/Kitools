@@ -25,7 +25,13 @@ public:
     void removeCategoryRule(const QString& name);
     QList<AppCategoryRule> getCategoryRules() const;
     
+    void setBrowserCategoryRule(const BrowserCategoryRule& rule);
+    void removeBrowserCategoryRule(const QString& name);
+    QList<BrowserCategoryRule> getBrowserCategoryRules() const;
+    
     ActivityCategory categorizeActivity(const ActivityRecord& record) const;
+    BrowserSubCategory categorizeBrowser(const QString& windowTitle) const;
+    void parseBrowserTitle(const QString& windowTitle, QString& domain, QString& pageTitle) const;
     
     void clearRecords(const QDate& date);
     void clearAllRecords();
@@ -46,14 +52,16 @@ private:
     void saveToFile();
     int generateId();
     void initDefaultCategoryRules();
+    void initDefaultBrowserRules();
     void compressOldData();
-    void loadCategoryRules();
     void saveCategoryRules();
+    void loadCategoryRules();
 
     static ActivityManager* m_instance;
     
     QList<ActivityRecord> m_records;
     QMap<QString, AppCategoryRule> m_categoryRules;
+    QMap<QString, BrowserCategoryRule> m_browserRules;
     QString m_dataFilePath;
     int m_maxRecords;
 };

@@ -16,24 +16,39 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <QDialog>
+#include <QTextEdit>
 
 #include "timetrackerdatatypes.h"
 
-class AddRuleDialog : public QDialog {
+class RuleEditDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit AddRuleDialog(QWidget* parent = nullptr);
-    ~AddRuleDialog();
+    explicit RuleEditDialog(bool isAppRule, QWidget* parent = nullptr);
+    ~RuleEditDialog();
 
     QString getRuleName() const;
-    ActivityCategory getCategory() const;
-    QString getProcessPattern() const;
+    ActivityCategory getAppCategory() const;
+    BrowserSubCategory getBrowserCategory() const;
+    QString getProcessPatterns() const;
+    QString getTitlePatterns() const;
+    QString getDomains() const;
+    QString getKeywords() const;
+
+    void setRuleName(const QString& name);
+    void setAppCategory(ActivityCategory category);
+    void setBrowserCategory(BrowserSubCategory category);
+    void setProcessPatterns(const QStringList& patterns);
+    void setTitlePatterns(const QStringList& patterns);
+    void setDomains(const QStringList& domains);
+    void setKeywords(const QStringList& keywords);
 
 private:
+    bool m_isAppRule;
     QLineEdit* m_nameEdit;
     QComboBox* m_categoryCombo;
-    QLineEdit* m_processEdit;
+    QTextEdit* m_patternsEdit;
+    QStringList m_currentPatterns;
 };
 
 class TimeTrackerSettingsPanel : public QWidget {
@@ -56,9 +71,14 @@ private slots:
     void onTrackingStateChanged(bool isTracking);
     void onActivityRecorded(const ActivityRecord& record);
     void onTabChanged(int index);
-    void onAddRuleClicked();
-    void onDeleteRuleClicked();
-    void onRuleSelectionChanged();
+    void onAddAppRuleClicked();
+    void onEditAppRuleClicked();
+    void onDeleteAppRuleClicked();
+    void onAppRuleSelectionChanged();
+    void onAddBrowserRuleClicked();
+    void onEditBrowserRuleClicked();
+    void onDeleteBrowserRuleClicked();
+    void onBrowserRuleSelectionChanged();
 
 private:
     void setupUI();
@@ -69,7 +89,8 @@ private:
     void updateTodaySummary();
     void updateCategoryStats();
     void updateAppRanking();
-    void refreshRuleList();
+    void refreshAppRuleList();
+    void refreshBrowserRuleList();
     QString formatDuration(int seconds) const;
 
     class WindowMonitor* m_monitor;
@@ -89,9 +110,15 @@ private:
     QProgressBar* m_goalProgress;
     QLabel* m_goalLabel;
     
-    QListWidget* m_ruleList;
-    QPushButton* m_addRuleBtn;
-    QPushButton* m_deleteRuleBtn;
+    QListWidget* m_appRuleList;
+    QPushButton* m_addAppRuleBtn;
+    QPushButton* m_editAppRuleBtn;
+    QPushButton* m_deleteAppRuleBtn;
+    
+    QListWidget* m_browserRuleList;
+    QPushButton* m_addBrowserRuleBtn;
+    QPushButton* m_editBrowserRuleBtn;
+    QPushButton* m_deleteBrowserRuleBtn;
 };
 
 #endif

@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QCoreApplication>
 #include <QDir>
+#include <QRegularExpression>
 
 ActivityManager* ActivityManager::m_instance = nullptr;
 
@@ -22,6 +23,11 @@ ActivityManager::ActivityManager(QObject* parent)
     
     initDefaultCategoryRules();
     qDebug() << "已初始化" << m_categoryRules.size() << "条默认分类规则";
+    
+    initDefaultBrowserRules();
+    qDebug() << "已初始化" << m_browserRules.size() << "条默认浏览器分类规则";
+    
+    loadCategoryRules();
     
     loadFromFile();
     qDebug() << "已加载" << m_records.size() << "条活动记录";
@@ -51,6 +57,13 @@ void ActivityManager::addActivityRecord(const ActivityRecord& record) {
     
     newRecord.category = categorizeActivity(newRecord);
     qDebug() << "分类结果:" << categoryToString(newRecord.category);
+    
+    if (newRecord.category == ActivityCategory::Browser) {
+        newRecord.browserSubCategory = categorizeBrowser(newRecord.windowTitle);
+        parseBrowserTitle(newRecord.windowTitle, newRecord.browserDomain, newRecord.browserPageTitle);
+        qDebug() << "浏览器子分类:" << browserSubCategoryToString(newRecord.browserSubCategory);
+        qDebug() << "域名:" << newRecord.browserDomain << "页面:" << newRecord.browserPageTitle;
+    }
     
     m_records.append(newRecord);
     qDebug() << "记录已添加，总记录数:" << m_records.size();
@@ -91,6 +104,10 @@ DailySummary ActivityManager::getDailySummary(const QDate& date) const {
             summary.totalSeconds += record.durationSeconds;
             summary.categorySeconds[record.category] += record.durationSeconds;
             summary.appSeconds[record.processName] += record.durationSeconds;
+            
+            if (record.category == ActivityCategory::Browser) {
+                summary.browserSubSeconds[record.browserSubCategory] += record.durationSeconds;
+            }
         }
     }
     
@@ -287,8 +304,19 @@ void ActivityManager::initDefaultCategoryRules() {
     gameRule.name = "游戏";
     gameRule.category = ActivityCategory::Game;
     gameRule.processPatterns = QStringList{
-        "steam", "epicgames", "origin", "uplay", "battlenet",
-        "leagueclient", "dota2", "csgo", "minecraft",
+        "steam", "epicgames", "origin", "uplay", "battlenet", "wegame",
+        "leagueclient", "dota2", "csgo", "minecraft", "valorant",
+        "delta", "deltaforce", "三角洲",
+        "genshin", "yuanshen", "原神",
+        "naraka", "永劫无间",
+        "pubg", "tslgame",
+        "apex", "r5apex",
+        "overwatch", "守望先锋",
+        "wow", "warcraft", "魔兽",
+        "lol", "leagueoflegends",
+        "crossfire", "穿越火线",
+        "dnf", "地下城",
+        "cf", "csol",
         "游戏", "game"
     };
     m_categoryRules[gameRule.name] = gameRule;
@@ -302,6 +330,166 @@ void ActivityManager::initDefaultCategoryRules() {
         "计算器", "记事本", "资源管理器"
     };
     m_categoryRules[systemRule.name] = systemRule;
+    
+    initDefaultBrowserRules();
+}
+
+void ActivityManager::initDefaultBrowserRules() {
+    qDebug() << "初始化默认浏览器分类规则";
+    
+    BrowserCategoryRule workRule;
+    workRule.name = "工作相关";
+    workRule.subCategory = BrowserSubCategory::Work;
+    workRule.domains = QStringList{
+        "github.com", "gitlab.com", "bitbucket.org",
+        "stackoverflow.com", "stackexchange.com",
+        "docs.microsoft.com", "developer.mozilla.org",
+        "npmjs.com", "pypi.org",
+        "jira.", "confluence.",
+        "notion.so", "figma.com",
+        "office.com", "docs.google.com"
+    };
+    workRule.keywords = QStringList{"文档", "API", "开发", "代码", "编程"};
+    m_browserRules[workRule.name] = workRule;
+    
+    BrowserCategoryRule learningRule;
+    learningRule.name = "学习相关";
+    learningRule.subCategory = BrowserSubCategory::Learning;
+    learningRule.domains = QStringList{
+        "coursera.org", "udemy.com", "edx.org",
+        "khanacademy.org", "codecademy.com",
+        "leetcode.com", "luogu.com",
+        "mooc.", "xuetangx.com",
+        "icourse163.org", "bilibili.com/video"
+    };
+    learningRule.keywords = QStringList{"教程", "学习", "课程", "培训", "教育"};
+    m_browserRules[learningRule.name] = learningRule;
+    
+    BrowserCategoryRule socialRule;
+    socialRule.name = "社交媒体";
+    socialRule.subCategory = BrowserSubCategory::Social;
+    socialRule.domains = QStringList{
+        "weibo.com", "twitter.com", "x.com",
+        "facebook.com", "instagram.com",
+        "linkedin.com", "zhihu.com",
+        "tieba.baidu.com", "douban.com",
+        "reddit.com"
+    };
+    socialRule.keywords = QStringList{"微博", "朋友圈", "动态"};
+    m_browserRules[socialRule.name] = socialRule;
+    
+    BrowserCategoryRule videoRule;
+    videoRule.name = "视频娱乐";
+    videoRule.subCategory = BrowserSubCategory::Video;
+    videoRule.domains = QStringList{
+        "youtube.com", "youtu.be",
+        "bilibili.com", "b23.tv",
+        "youku.com", "iqiyi.com",
+        "v.qq.com", "tv.sohu.com",
+        "netflix.com", "disneyplus.com"
+    };
+    videoRule.keywords = QStringList{"视频", "电影", "电视剧", "动漫", "综艺"};
+    m_browserRules[videoRule.name] = videoRule;
+    
+    BrowserCategoryRule shoppingRule;
+    shoppingRule.name = "购物";
+    shoppingRule.subCategory = BrowserSubCategory::Shopping;
+    shoppingRule.domains = QStringList{
+        "taobao.com", "tmall.com", "jd.com",
+        "amazon.com", "amazon.cn",
+        "pinduoduo.com", "suning.com",
+        "1688.com", "aliexpress.com"
+    };
+    shoppingRule.keywords = QStringList{"购物", "商城", "旗舰店"};
+    m_browserRules[shoppingRule.name] = shoppingRule;
+    
+    BrowserCategoryRule newsRule;
+    newsRule.name = "新闻资讯";
+    newsRule.subCategory = BrowserSubCategory::News;
+    newsRule.domains = QStringList{
+        "news.", "sina.com.cn", "sohu.com",
+        "163.com", "qq.com/news",
+        "thepaper.cn", "guancha.cn",
+        "cctv.com", "xinhuanet.com"
+    };
+    newsRule.keywords = QStringList{"新闻", "资讯", "头条", "热点"};
+    m_browserRules[newsRule.name] = newsRule;
+    
+    qDebug() << "已初始化" << m_browserRules.size() << "条浏览器分类规则";
+}
+
+BrowserSubCategory ActivityManager::categorizeBrowser(const QString& windowTitle) const {
+    QString titleLower = windowTitle.toLower();
+    
+    for (const BrowserCategoryRule& rule : m_browserRules) {
+        for (const QString& domain : rule.domains) {
+            if (titleLower.contains(domain.toLower())) {
+                qDebug() << "浏览器标题匹配域名:" << domain << "->" << rule.name;
+                return rule.subCategory;
+            }
+        }
+        
+        for (const QString& keyword : rule.keywords) {
+            if (titleLower.contains(keyword.toLower())) {
+                qDebug() << "浏览器标题匹配关键词:" << keyword << "->" << rule.name;
+                return rule.subCategory;
+            }
+        }
+    }
+    
+    return BrowserSubCategory::Other;
+}
+
+void ActivityManager::parseBrowserTitle(const QString& windowTitle, QString& domain, QString& pageTitle) const {
+    QStringList separators = {" - ", " — ", " – ", " | "};
+    
+    QString remaining = windowTitle;
+    QString browserSuffix;
+    
+    QStringList browserNames = {"Google Chrome", "Mozilla Firefox", "Microsoft Edge", "Opera", "Safari", "360浏览器", "QQ浏览器", "搜狗浏览器"};
+    for (const QString& browser : browserNames) {
+        if (remaining.endsWith(browser)) {
+            browserSuffix = browser;
+            remaining.chop(browser.length());
+            break;
+        }
+    }
+    
+    for (const QString& sep : separators) {
+        int idx = remaining.lastIndexOf(sep);
+        if (idx > 0) {
+            pageTitle = remaining.left(idx).trimmed();
+            domain = remaining.mid(idx + sep.length()).trimmed();
+            break;
+        }
+    }
+    
+    if (pageTitle.isEmpty()) {
+        pageTitle = remaining.trimmed();
+    }
+    
+    QRegularExpression domainRegex(R"(([a-zA-Z0-9][-a-zA-Z0-9]*\.)+[a-zA-Z]{2,})");
+    QRegularExpressionMatch match = domainRegex.match(windowTitle);
+    if (match.hasMatch()) {
+        domain = match.captured(0);
+    }
+    
+    qDebug() << "解析浏览器标题:" << windowTitle << "-> 域名:" << domain << "页面:" << pageTitle;
+}
+
+void ActivityManager::setBrowserCategoryRule(const BrowserCategoryRule& rule) {
+    m_browserRules[rule.name] = rule;
+}
+
+void ActivityManager::removeBrowserCategoryRule(const QString& name) {
+    if (m_browserRules.contains(name)) {
+        m_browserRules.remove(name);
+        qDebug() << "已删除浏览器分类规则:" << name;
+    }
+}
+
+QList<BrowserCategoryRule> ActivityManager::getBrowserCategoryRules() const {
+    return m_browserRules.values();
 }
 
 void ActivityManager::compressOldData() {
@@ -331,8 +519,63 @@ void ActivityManager::compressOldData() {
     qDebug() << "压缩旧数据，删除" << (m_records.size() - newRecords.size()) << "条记录";
 }
 
-void ActivityManager::loadCategoryRules() {
+void ActivityManager::saveCategoryRules() {
+    qDebug() << "保存分类规则到文件...";
+
+    QJsonObject root;
+
+    QJsonObject appRulesObj;
+    for (auto it = m_categoryRules.begin(); it != m_categoryRules.end(); ++it) {
+        appRulesObj[it.key()] = it.value().toJson();
+    }
+    root["appRules"] = appRulesObj;
+
+    QJsonObject browserRulesObj;
+    for (auto it = m_browserRules.begin(); it != m_browserRules.end(); ++it) {
+        browserRulesObj[it.key()] = it.value().toJson();
+    }
+    root["browserRules"] = browserRulesObj;
+
+    QJsonDocument doc(root);
+    QFile file(m_dataFilePath);
+    if (file.open(QIODevice::ReadWrite | QIODevice::Truncate)) {
+        file.write(doc.toJson());
+        file.close();
+        qDebug() << "分类规则已保存";
+    } else {
+        qWarning() << "无法保存分类规则";
+    }
 }
 
-void ActivityManager::saveCategoryRules() {
+void ActivityManager::loadCategoryRules() {
+    qDebug() << "从文件加载分类规则...";
+
+    QFile file(m_dataFilePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "分类规则文件不存在，使用默认规则";
+        return;
+    }
+
+    QByteArray data = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (!doc.isObject()) {
+        return;
+    }
+
+    QJsonObject root = doc.object();
+
+    QJsonObject appRulesObj = root["appRules"].toObject();
+    for (auto it = appRulesObj.begin(); it != appRulesObj.end(); ++it) {
+        m_categoryRules[it.key()] = AppCategoryRule::fromJson(it.value().toObject());
+    }
+
+    QJsonObject browserRulesObj = root["browserRules"].toObject();
+    for (auto it = browserRulesObj.begin(); it != browserRulesObj.end(); ++it) {
+        m_browserRules[it.key()] = BrowserCategoryRule::fromJson(it.value().toObject());
+    }
+
+    qDebug() << "已加载" << m_categoryRules.size() << "条应用分类规则";
+    qDebug() << "已加载" << m_browserRules.size() << "条浏览器分类规则";
 }

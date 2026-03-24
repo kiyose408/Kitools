@@ -7,55 +7,133 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 
-AddRuleDialog::AddRuleDialog(QWidget* parent)
+RuleEditDialog::RuleEditDialog(bool isAppRule, QWidget* parent)
     : QDialog(parent)
+    , m_isAppRule(isAppRule)
     , m_nameEdit(nullptr)
     , m_categoryCombo(nullptr)
-    , m_processEdit(nullptr)
+    , m_patternsEdit(nullptr)
 {
-    setWindowTitle("添加分类规则");
-    setMinimumWidth(400);
+    setWindowTitle(isAppRule ? "编辑应用分类规则" : "编辑浏览器分类规则");
+    setMinimumWidth(500);
+    setMinimumHeight(400);
     
-    QFormLayout* layout = new QFormLayout(this);
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    
+    QFormLayout* formLayout = new QFormLayout();
     
     m_nameEdit = new QLineEdit(this);
     m_nameEdit->setPlaceholderText("输入规则名称");
-    layout->addRow("规则名称:", m_nameEdit);
+    formLayout->addRow("规则名称:", m_nameEdit);
     
-    m_categoryCombo = new QComboBox(this);
-    m_categoryCombo->addItem("开发工具", static_cast<int>(ActivityCategory::Development));
-    m_categoryCombo->addItem("浏览器", static_cast<int>(ActivityCategory::Browser));
-    m_categoryCombo->addItem("办公软件", static_cast<int>(ActivityCategory::Office));
-    m_categoryCombo->addItem("社交通讯", static_cast<int>(ActivityCategory::Communication));
-    m_categoryCombo->addItem("多媒体", static_cast<int>(ActivityCategory::Media));
-    m_categoryCombo->addItem("游戏", static_cast<int>(ActivityCategory::Game));
-    m_categoryCombo->addItem("系统工具", static_cast<int>(ActivityCategory::System));
-    m_categoryCombo->addItem("其他", static_cast<int>(ActivityCategory::Other));
-    layout->addRow("分类:", m_categoryCombo);
+    if (isAppRule) {
+        m_categoryCombo = new QComboBox(this);
+        m_categoryCombo->addItem("开发工具", static_cast<int>(ActivityCategory::Development));
+        m_categoryCombo->addItem("浏览器", static_cast<int>(ActivityCategory::Browser));
+        m_categoryCombo->addItem("办公软件", static_cast<int>(ActivityCategory::Office));
+        m_categoryCombo->addItem("社交通讯", static_cast<int>(ActivityCategory::Communication));
+        m_categoryCombo->addItem("多媒体", static_cast<int>(ActivityCategory::Media));
+        m_categoryCombo->addItem("游戏", static_cast<int>(ActivityCategory::Game));
+        m_categoryCombo->addItem("系统工具", static_cast<int>(ActivityCategory::System));
+        m_categoryCombo->addItem("其他", static_cast<int>(ActivityCategory::Other));
+        formLayout->addRow("分类:", m_categoryCombo);
+        
+        QLabel* processLabel = new QLabel("进程名匹配 (每行一个，支持部分匹配):", this);
+        formLayout->addRow(processLabel);
+    } else {
+        m_categoryCombo = new QComboBox(this);
+        m_categoryCombo->addItem("工作相关", static_cast<int>(BrowserSubCategory::Work));
+        m_categoryCombo->addItem("学习相关", static_cast<int>(BrowserSubCategory::Learning));
+        m_categoryCombo->addItem("社交媒体", static_cast<int>(BrowserSubCategory::Social));
+        m_categoryCombo->addItem("视频娱乐", static_cast<int>(BrowserSubCategory::Video));
+        m_categoryCombo->addItem("购物", static_cast<int>(BrowserSubCategory::Shopping));
+        m_categoryCombo->addItem("新闻资讯", static_cast<int>(BrowserSubCategory::News));
+        m_categoryCombo->addItem("其他", static_cast<int>(BrowserSubCategory::Other));
+        formLayout->addRow("分类:", m_categoryCombo);
+        
+        QLabel* domainLabel = new QLabel("域名匹配 (每行一个，支持部分匹配):", this);
+        formLayout->addRow(domainLabel);
+    }
     
-    m_processEdit = new QLineEdit(this);
-    m_processEdit->setPlaceholderText("输入进程名关键字，如: chrome, wechat");
-    layout->addRow("进程名:", m_processEdit);
+    mainLayout->addLayout(formLayout);
+    
+    m_patternsEdit = new QTextEdit(this);
+    m_patternsEdit->setPlaceholderText("每行输入一个匹配项\n例如:\nchrome\nfirefox\ngithub.com");
+    m_patternsEdit->setMinimumHeight(200);
+    mainLayout->addWidget(m_patternsEdit);
     
     QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-    layout->addRow(buttons);
+    mainLayout->addWidget(buttons);
 }
 
-AddRuleDialog::~AddRuleDialog() {
+RuleEditDialog::~RuleEditDialog() {
 }
 
-QString AddRuleDialog::getRuleName() const {
+QString RuleEditDialog::getRuleName() const {
     return m_nameEdit ? m_nameEdit->text().trimmed() : QString();
 }
 
-ActivityCategory AddRuleDialog::getCategory() const {
+ActivityCategory RuleEditDialog::getAppCategory() const {
     return m_categoryCombo ? static_cast<ActivityCategory>(m_categoryCombo->currentData().toInt()) : ActivityCategory::Other;
 }
 
-QString AddRuleDialog::getProcessPattern() const {
-    return m_processEdit ? m_processEdit->text().trimmed().toLower() : QString();
+BrowserSubCategory RuleEditDialog::getBrowserCategory() const {
+    return m_categoryCombo ? static_cast<BrowserSubCategory>(m_categoryCombo->currentData().toInt()) : BrowserSubCategory::Other;
+}
+
+QString RuleEditDialog::getProcessPatterns() const {
+    if (!m_patternsEdit) return QString();
+    return m_patternsEdit->toPlainText();
+}
+
+QString RuleEditDialog::getDomains() const {
+    return getProcessPatterns();
+}
+
+QString RuleEditDialog::getKeywords() const {
+    return getProcessPatterns();
+}
+
+void RuleEditDialog::setRuleName(const QString& name) {
+    if (m_nameEdit) m_nameEdit->setText(name);
+}
+
+void RuleEditDialog::setAppCategory(ActivityCategory category) {
+    if (m_categoryCombo) {
+        for (int i = 0; i < m_categoryCombo->count(); ++i) {
+            if (m_categoryCombo->itemData(i).toInt() == static_cast<int>(category)) {
+                m_categoryCombo->setCurrentIndex(i);
+                break;
+            }
+        }
+    }
+}
+
+void RuleEditDialog::setBrowserCategory(BrowserSubCategory category) {
+    if (m_categoryCombo) {
+        for (int i = 0; i < m_categoryCombo->count(); ++i) {
+            if (m_categoryCombo->itemData(i).toInt() == static_cast<int>(category)) {
+                m_categoryCombo->setCurrentIndex(i);
+                break;
+            }
+        }
+    }
+}
+
+void RuleEditDialog::setProcessPatterns(const QStringList& patterns) {
+    if (m_patternsEdit) {
+        m_patternsEdit->setText(patterns.join("\n"));
+    }
+}
+
+void RuleEditDialog::setDomains(const QStringList& domains) {
+    setProcessPatterns(domains);
+}
+
+void RuleEditDialog::setKeywords(const QStringList& keywords) {
+    setProcessPatterns(keywords);
 }
 
 TimeTrackerSettingsPanel::TimeTrackerSettingsPanel(QWidget* parent)
@@ -73,9 +151,14 @@ TimeTrackerSettingsPanel::TimeTrackerSettingsPanel(QWidget* parent)
     , m_appRankingList(nullptr)
     , m_goalProgress(nullptr)
     , m_goalLabel(nullptr)
-    , m_ruleList(nullptr)
-    , m_addRuleBtn(nullptr)
-    , m_deleteRuleBtn(nullptr)
+    , m_appRuleList(nullptr)
+    , m_addAppRuleBtn(nullptr)
+    , m_editAppRuleBtn(nullptr)
+    , m_deleteAppRuleBtn(nullptr)
+    , m_browserRuleList(nullptr)
+    , m_addBrowserRuleBtn(nullptr)
+    , m_editBrowserRuleBtn(nullptr)
+    , m_deleteBrowserRuleBtn(nullptr)
 {
     qDebug() << "========== TimeTrackerSettingsPanel 初始化 ==========";
     
@@ -264,67 +347,82 @@ void TimeTrackerSettingsPanel::setupCategoryTab() {
     QVBoxLayout* layout = new QVBoxLayout(categoryTab);
     layout->setSpacing(15);
 
-    QLabel* infoLabel = new QLabel("应用分类规则", categoryTab);
+    QLabel* infoLabel = new QLabel("分类规则管理", categoryTab);
     infoLabel->setStyleSheet("QLabel { font-size: 14px; font-weight: bold; color: #2c3e50; }");
     layout->addWidget(infoLabel);
 
-    QLabel* descLabel = new QLabel("可以添加自定义规则来分类应用程序：", categoryTab);
+    QLabel* descLabel = new QLabel("管理应用和浏览器的分类规则，支持添加、编辑、删除自定义规则，也可以编辑预设规则的匹配项。", categoryTab);
     descLabel->setStyleSheet("QLabel { color: #7f8c8d; }");
     descLabel->setWordWrap(true);
     layout->addWidget(descLabel);
 
-    QGroupBox* customGroup = new QGroupBox("自定义规则", categoryTab);
-    customGroup->setStyleSheet("QGroupBox { font-weight: bold; color: #2c3e50; }");
+    QGroupBox* appGroup = new QGroupBox("应用分类规则", categoryTab);
+    appGroup->setStyleSheet("QGroupBox { font-weight: bold; color: #2c3e50; }");
     
-    QVBoxLayout* customLayout = new QVBoxLayout(customGroup);
+    QVBoxLayout* appLayout = new QVBoxLayout(appGroup);
     
-    m_ruleList = new QListWidget(customGroup);
-    m_ruleList->setStyleSheet("QListWidget { background-color: white; border: 1px solid #dcdde1; border-radius: 5px; min-height: 150px; }");
-    connect(m_ruleList, &QListWidget::itemSelectionChanged, this, &TimeTrackerSettingsPanel::onRuleSelectionChanged);
-    customLayout->addWidget(m_ruleList);
+    m_appRuleList = new QListWidget(appGroup);
+    m_appRuleList->setStyleSheet("QListWidget { background-color: white; border: 1px solid #dcdde1; border-radius: 5px; min-height: 120px; }");
+    connect(m_appRuleList, &QListWidget::itemSelectionChanged, this, &TimeTrackerSettingsPanel::onAppRuleSelectionChanged);
+    appLayout->addWidget(m_appRuleList);
     
-    QHBoxLayout* btnLayout = new QHBoxLayout();
-    m_addRuleBtn = new QPushButton("添加规则", customGroup);
-    m_addRuleBtn->setStyleSheet("QPushButton { padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 5px; }");
-    connect(m_addRuleBtn, &QPushButton::clicked, this, &TimeTrackerSettingsPanel::onAddRuleClicked);
-    btnLayout->addWidget(m_addRuleBtn);
+    QHBoxLayout* appBtnLayout = new QHBoxLayout();
+    m_addAppRuleBtn = new QPushButton("新建规则", appGroup);
+    m_addAppRuleBtn->setStyleSheet("QPushButton { padding: 6px 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; }");
+    connect(m_addAppRuleBtn, &QPushButton::clicked, this, &TimeTrackerSettingsPanel::onAddAppRuleClicked);
+    appBtnLayout->addWidget(m_addAppRuleBtn);
     
-    m_deleteRuleBtn = new QPushButton("删除规则", customGroup);
-    m_deleteRuleBtn->setStyleSheet("QPushButton { padding: 8px 15px; background-color: #e74c3c; color: white; border: none; border-radius: 5px; }");
-    m_deleteRuleBtn->setEnabled(false);
-    connect(m_deleteRuleBtn, &QPushButton::clicked, this, &TimeTrackerSettingsPanel::onDeleteRuleClicked);
-    btnLayout->addWidget(m_deleteRuleBtn);
+    m_editAppRuleBtn = new QPushButton("编辑规则", appGroup);
+    m_editAppRuleBtn->setStyleSheet("QPushButton { padding: 6px 12px; background-color: #f39c12; color: white; border: none; border-radius: 4px; }");
+    m_editAppRuleBtn->setEnabled(false);
+    connect(m_editAppRuleBtn, &QPushButton::clicked, this, &TimeTrackerSettingsPanel::onEditAppRuleClicked);
+    appBtnLayout->addWidget(m_editAppRuleBtn);
     
-    customLayout->addLayout(btnLayout);
-    layout->addWidget(customGroup);
+    m_deleteAppRuleBtn = new QPushButton("删除规则", appGroup);
+    m_deleteAppRuleBtn->setStyleSheet("QPushButton { padding: 6px 12px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; }");
+    m_deleteAppRuleBtn->setEnabled(false);
+    connect(m_deleteAppRuleBtn, &QPushButton::clicked, this, &TimeTrackerSettingsPanel::onDeleteAppRuleClicked);
+    appBtnLayout->addWidget(m_deleteAppRuleBtn);
+    
+    appLayout->addLayout(appBtnLayout);
+    layout->addWidget(appGroup);
 
-    QGroupBox* presetGroup = new QGroupBox("预设规则（只读）", categoryTab);
-    presetGroup->setStyleSheet("QGroupBox { font-weight: bold; color: #2c3e50; }");
+    QGroupBox* browserGroup = new QGroupBox("浏览器分类规则", categoryTab);
+    browserGroup->setStyleSheet("QGroupBox { font-weight: bold; color: #2c3e50; }");
     
-    QVBoxLayout* presetLayout = new QVBoxLayout(presetGroup);
+    QVBoxLayout* browserLayout = new QVBoxLayout(browserGroup);
     
-    if (m_manager) {
-        QList<AppCategoryRule> rules = m_manager->getCategoryRules();
-        for (const AppCategoryRule& rule : rules) {
-            QString patterns;
-            for (const QString& p : rule.processPatterns) {
-                if (!patterns.isEmpty()) patterns += ", ";
-                patterns += p;
-            }
-            
-            QLabel* ruleLabel = new QLabel(QString("%1: %2").arg(categoryToString(rule.category)).arg(patterns), presetGroup);
-            ruleLabel->setStyleSheet("QLabel { color: #7f8c8d; font-size: 11px; }");
-            ruleLabel->setWordWrap(true);
-            presetLayout->addWidget(ruleLabel);
-        }
-    }
+    m_browserRuleList = new QListWidget(browserGroup);
+    m_browserRuleList->setStyleSheet("QListWidget { background-color: white; border: 1px solid #dcdde1; border-radius: 5px; min-height: 120px; }");
+    connect(m_browserRuleList, &QListWidget::itemSelectionChanged, this, &TimeTrackerSettingsPanel::onBrowserRuleSelectionChanged);
+    browserLayout->addWidget(m_browserRuleList);
     
-    layout->addWidget(presetGroup);
+    QHBoxLayout* browserBtnLayout = new QHBoxLayout();
+    m_addBrowserRuleBtn = new QPushButton("新建规则", browserGroup);
+    m_addBrowserRuleBtn->setStyleSheet("QPushButton { padding: 6px 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; }");
+    connect(m_addBrowserRuleBtn, &QPushButton::clicked, this, &TimeTrackerSettingsPanel::onAddBrowserRuleClicked);
+    browserBtnLayout->addWidget(m_addBrowserRuleBtn);
+    
+    m_editBrowserRuleBtn = new QPushButton("编辑规则", browserGroup);
+    m_editBrowserRuleBtn->setStyleSheet("QPushButton { padding: 6px 12px; background-color: #f39c12; color: white; border: none; border-radius: 4px; }");
+    m_editBrowserRuleBtn->setEnabled(false);
+    connect(m_editBrowserRuleBtn, &QPushButton::clicked, this, &TimeTrackerSettingsPanel::onEditBrowserRuleClicked);
+    browserBtnLayout->addWidget(m_editBrowserRuleBtn);
+    
+    m_deleteBrowserRuleBtn = new QPushButton("删除规则", browserGroup);
+    m_deleteBrowserRuleBtn->setStyleSheet("QPushButton { padding: 6px 12px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; }");
+    m_deleteBrowserRuleBtn->setEnabled(false);
+    connect(m_deleteBrowserRuleBtn, &QPushButton::clicked, this, &TimeTrackerSettingsPanel::onDeleteBrowserRuleClicked);
+    browserBtnLayout->addWidget(m_deleteBrowserRuleBtn);
+    
+    browserLayout->addLayout(browserBtnLayout);
+    layout->addWidget(browserGroup);
 
     layout->addStretch();
     m_tabWidget->addTab(categoryTab, "分类规则");
     
-    refreshRuleList();
+    refreshAppRuleList();
+    refreshBrowserRuleList();
 }
 
 void TimeTrackerSettingsPanel::onStartStopClicked() {
@@ -404,6 +502,250 @@ void TimeTrackerSettingsPanel::onTabChanged(int index) {
     }
 }
 
+void TimeTrackerSettingsPanel::onAddAppRuleClicked() {
+    RuleEditDialog dialog(true, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        QString name = dialog.getRuleName();
+        if (name.isEmpty()) {
+            QMessageBox::warning(this, "输入错误", "请填写规则名称");
+            return;
+        }
+        
+        if (m_manager) {
+            AppCategoryRule rule;
+            rule.name = name;
+            rule.category = dialog.getAppCategory();
+            QString patternsText = dialog.getProcessPatterns();
+            rule.processPatterns = patternsText.split("\n", Qt::SkipEmptyParts);
+            for (QString& p : rule.processPatterns) {
+                p = p.trimmed().toLower();
+            }
+            m_manager->setCategoryRule(rule);
+            refreshAppRuleList();
+            QMessageBox::information(this, "成功", "规则添加成功！");
+        }
+    }
+}
+
+void TimeTrackerSettingsPanel::onEditAppRuleClicked() {
+    if (!m_appRuleList || !m_manager) return;
+    
+    QListWidgetItem* item = m_appRuleList->currentItem();
+    if (!item) return;
+    
+    QString ruleName = item->data(Qt::UserRole).toString();
+    QList<AppCategoryRule> rules = m_manager->getCategoryRules();
+    
+    AppCategoryRule* targetRule = nullptr;
+    for (AppCategoryRule& rule : rules) {
+        if (rule.name == ruleName) {
+            targetRule = &rule;
+            break;
+        }
+    }
+    
+    if (!targetRule) return;
+    
+    RuleEditDialog dialog(true, this);
+    dialog.setRuleName(targetRule->name);
+    dialog.setAppCategory(targetRule->category);
+    dialog.setProcessPatterns(targetRule->processPatterns);
+    
+    if (dialog.exec() == QDialog::Accepted) {
+        QString name = dialog.getRuleName();
+        if (name.isEmpty()) {
+            QMessageBox::warning(this, "输入错误", "请填写规则名称");
+            return;
+        }
+        
+        targetRule->name = name;
+        targetRule->category = dialog.getAppCategory();
+        QString patternsText = dialog.getProcessPatterns();
+        targetRule->processPatterns = patternsText.split("\n", Qt::SkipEmptyParts);
+        for (QString& p : targetRule->processPatterns) {
+            p = p.trimmed().toLower();
+        }
+        
+        m_manager->setCategoryRule(*targetRule);
+        refreshAppRuleList();
+        QMessageBox::information(this, "成功", "规则更新成功！");
+    }
+}
+
+void TimeTrackerSettingsPanel::onDeleteAppRuleClicked() {
+    if (!m_appRuleList || !m_manager) return;
+    
+    QListWidgetItem* item = m_appRuleList->currentItem();
+    if (!item) return;
+    
+    QString ruleName = item->data(Qt::UserRole).toString();
+    
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "确认删除", 
+        QString("确定要删除规则 \"%1\" 吗？").arg(ruleName), 
+        QMessageBox::Yes | QMessageBox::No);
+    
+    if (reply == QMessageBox::Yes) {
+        m_manager->removeCategoryRule(ruleName);
+        refreshAppRuleList();
+    }
+}
+
+void TimeTrackerSettingsPanel::onAppRuleSelectionChanged() {
+    bool hasSelection = m_appRuleList && m_appRuleList->currentItem() != nullptr;
+    if (m_editAppRuleBtn) m_editAppRuleBtn->setEnabled(hasSelection);
+    if (m_deleteAppRuleBtn) m_deleteAppRuleBtn->setEnabled(hasSelection);
+}
+
+void TimeTrackerSettingsPanel::onAddBrowserRuleClicked() {
+    RuleEditDialog dialog(false, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        QString name = dialog.getRuleName();
+        if (name.isEmpty()) {
+            QMessageBox::warning(this, "输入错误", "请填写规则名称");
+            return;
+        }
+        
+        if (m_manager) {
+            BrowserCategoryRule rule;
+            rule.name = name;
+            rule.subCategory = dialog.getBrowserCategory();
+            QString domainsText = dialog.getDomains();
+            rule.domains = domainsText.split("\n", Qt::SkipEmptyParts);
+            for (QString& d : rule.domains) {
+                d = d.trimmed().toLower();
+            }
+            m_manager->setBrowserCategoryRule(rule);
+            refreshBrowserRuleList();
+            QMessageBox::information(this, "成功", "规则添加成功！");
+        }
+    }
+}
+
+void TimeTrackerSettingsPanel::onEditBrowserRuleClicked() {
+    if (!m_browserRuleList || !m_manager) return;
+    
+    QListWidgetItem* item = m_browserRuleList->currentItem();
+    if (!item) return;
+    
+    QString ruleName = item->data(Qt::UserRole).toString();
+    QList<BrowserCategoryRule> rules = m_manager->getBrowserCategoryRules();
+    
+    BrowserCategoryRule* targetRule = nullptr;
+    for (BrowserCategoryRule& rule : rules) {
+        if (rule.name == ruleName) {
+            targetRule = &rule;
+            break;
+        }
+    }
+    
+    if (!targetRule) return;
+    
+    RuleEditDialog dialog(false, this);
+    dialog.setRuleName(targetRule->name);
+    dialog.setBrowserCategory(targetRule->subCategory);
+    dialog.setDomains(targetRule->domains);
+    
+    if (dialog.exec() == QDialog::Accepted) {
+        QString name = dialog.getRuleName();
+        if (name.isEmpty()) {
+            QMessageBox::warning(this, "输入错误", "请填写规则名称");
+            return;
+        }
+        
+        targetRule->name = name;
+        targetRule->subCategory = dialog.getBrowserCategory();
+        QString domainsText = dialog.getDomains();
+        targetRule->domains = domainsText.split("\n", Qt::SkipEmptyParts);
+        for (QString& d : targetRule->domains) {
+            d = d.trimmed().toLower();
+        }
+        
+        m_manager->setBrowserCategoryRule(*targetRule);
+        refreshBrowserRuleList();
+        QMessageBox::information(this, "成功", "规则更新成功！");
+    }
+}
+
+void TimeTrackerSettingsPanel::onDeleteBrowserRuleClicked() {
+    if (!m_browserRuleList || !m_manager) return;
+    
+    QListWidgetItem* item = m_browserRuleList->currentItem();
+    if (!item) return;
+    
+    QString ruleName = item->data(Qt::UserRole).toString();
+    
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "确认删除", 
+        QString("确定要删除规则 \"%1\" 吗？").arg(ruleName), 
+        QMessageBox::Yes | QMessageBox::No);
+    
+    if (reply == QMessageBox::Yes) {
+        m_manager->removeBrowserCategoryRule(ruleName);
+        refreshBrowserRuleList();
+    }
+}
+
+void TimeTrackerSettingsPanel::onBrowserRuleSelectionChanged() {
+    bool hasSelection = m_browserRuleList && m_browserRuleList->currentItem() != nullptr;
+    if (m_editBrowserRuleBtn) m_editBrowserRuleBtn->setEnabled(hasSelection);
+    if (m_deleteBrowserRuleBtn) m_deleteBrowserRuleBtn->setEnabled(hasSelection);
+}
+
+void TimeTrackerSettingsPanel::refreshAppRuleList() {
+    if (!m_appRuleList || !m_manager) return;
+    
+    m_appRuleList->clear();
+    
+    QList<AppCategoryRule> rules = m_manager->getCategoryRules();
+    for (const AppCategoryRule& rule : rules) {
+        QString patterns;
+        for (const QString& p : rule.processPatterns) {
+            if (!patterns.isEmpty()) patterns += ", ";
+            if (patterns.length() > 50) {
+                patterns += "...";
+                break;
+            }
+            patterns += p;
+        }
+        
+        QString displayText = QString("%1 [%2]: %3").arg(rule.name).arg(categoryToString(rule.category)).arg(patterns);
+        QListWidgetItem* item = new QListWidgetItem(displayText, m_appRuleList);
+        item->setData(Qt::UserRole, rule.name);
+        m_appRuleList->addItem(item);
+    }
+    
+    if (rules.isEmpty()) {
+        m_appRuleList->addItem("暂无应用分类规则");
+    }
+}
+
+void TimeTrackerSettingsPanel::refreshBrowserRuleList() {
+    if (!m_browserRuleList || !m_manager) return;
+    
+    m_browserRuleList->clear();
+    
+    QList<BrowserCategoryRule> rules = m_manager->getBrowserCategoryRules();
+    for (const BrowserCategoryRule& rule : rules) {
+        QString domains;
+        for (const QString& d : rule.domains) {
+            if (!domains.isEmpty()) domains += ", ";
+            if (domains.length() > 50) {
+                domains += "...";
+                break;
+            }
+            domains += d;
+        }
+        
+        QString displayText = QString("%1 [%2]: %3").arg(rule.name).arg(browserSubCategoryToString(rule.subCategory)).arg(domains);
+        QListWidgetItem* item = new QListWidgetItem(displayText, m_browserRuleList);
+        item->setData(Qt::UserRole, rule.name);
+        m_browserRuleList->addItem(item);
+    }
+    
+    if (rules.isEmpty()) {
+        m_browserRuleList->addItem("暂无浏览器分类规则");
+    }
+}
+
 void TimeTrackerSettingsPanel::updateTrackingButton() {
     if (!m_startStopBtn || !m_monitor) return;
     
@@ -448,6 +790,15 @@ void TimeTrackerSettingsPanel::updateCategoryStats() {
     for (auto it = summary.categorySeconds.begin(); it != summary.categorySeconds.end(); ++it) {
         if (it.value() > 0) {
             statsText += QString("  %1: %2\n").arg(categoryToString(it.key())).arg(formatDuration(it.value()));
+        }
+    }
+    
+    if (summary.browserSubSeconds.size() > 0) {
+        statsText += "\n浏览器使用详情:\n";
+        for (auto it = summary.browserSubSeconds.begin(); it != summary.browserSubSeconds.end(); ++it) {
+            if (it.value() > 0) {
+                statsText += QString("  %1: %2\n").arg(browserSubCategoryToString(it.key())).arg(formatDuration(it.value()));
+            }
         }
     }
     
@@ -498,90 +849,5 @@ QString TimeTrackerSettingsPanel::formatDuration(int seconds) const {
         return QString("%1分钟%2秒").arg(minutes).arg(secs);
     } else {
         return QString("%1秒").arg(secs);
-    }
-}
-
-void TimeTrackerSettingsPanel::onAddRuleClicked() {
-    AddRuleDialog dialog(this);
-    if (dialog.exec() == QDialog::Accepted) {
-        QString name = dialog.getRuleName();
-        ActivityCategory category = dialog.getCategory();
-        QString pattern = dialog.getProcessPattern();
-        
-        if (name.isEmpty() || pattern.isEmpty()) {
-            QMessageBox::warning(this, "输入错误", "请填写规则名称和进程名");
-            return;
-        }
-        
-        if (m_manager) {
-            QList<AppCategoryRule> existingRules = m_manager->getCategoryRules();
-            for (const AppCategoryRule& existingRule : existingRules) {
-                if (existingRule.name == name) {
-                    QMessageBox::StandardButton reply = QMessageBox::question(this, "规则已存在", 
-                        QString("规则 \"%1\" 已存在，是否覆盖？").arg(name), 
-                        QMessageBox::Yes | QMessageBox::No);
-                    if (reply != QMessageBox::Yes) {
-                        return;
-                    }
-                    break;
-                }
-            }
-            
-            AppCategoryRule rule;
-            rule.name = name;
-            rule.category = category;
-            rule.processPatterns.append(pattern);
-            m_manager->setCategoryRule(rule);
-            refreshRuleList();
-            QMessageBox::information(this, "成功", "规则添加成功！");
-        }
-    }
-}
-
-void TimeTrackerSettingsPanel::onDeleteRuleClicked() {
-    if (!m_ruleList || !m_manager) return;
-    
-    QListWidgetItem* item = m_ruleList->currentItem();
-    if (!item) return;
-    
-    QString ruleName = item->data(Qt::UserRole).toString();
-    
-    QMessageBox::StandardButton reply = QMessageBox::question(this, "确认删除", 
-        QString("确定要删除规则 \"%1\" 吗？").arg(ruleName), 
-        QMessageBox::Yes | QMessageBox::No);
-    
-    if (reply == QMessageBox::Yes) {
-        m_manager->removeCategoryRule(ruleName);
-        refreshRuleList();
-    }
-}
-
-void TimeTrackerSettingsPanel::onRuleSelectionChanged() {
-    if (m_deleteRuleBtn && m_ruleList) {
-        m_deleteRuleBtn->setEnabled(m_ruleList->currentItem() != nullptr);
-    }
-}
-
-void TimeTrackerSettingsPanel::refreshRuleList() {
-    if (!m_ruleList || !m_manager) return;
-    
-    m_ruleList->clear();
-    
-    QList<AppCategoryRule> rules = m_manager->getCategoryRules();
-    for (const AppCategoryRule& rule : rules) {
-        QString patterns;
-        for (const QString& p : rule.processPatterns) {
-            if (!patterns.isEmpty()) patterns += ", ";
-            patterns += p;
-        }
-        
-        QString displayText = QString("%1 [%2]: %3").arg(rule.name).arg(categoryToString(rule.category)).arg(patterns);
-        QListWidgetItem* item = new QListWidgetItem(displayText, m_ruleList);
-        item->setData(Qt::UserRole, rule.name);
-        m_ruleList->addItem(item);
-    }
-    
-    if (rules.isEmpty()) {
-        m_ruleList->addItem("暂无自定义规则");
     }
 }
