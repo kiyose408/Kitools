@@ -1,4 +1,5 @@
 #include "clipboardsettingspanel.h"
+#include "modules/timer/settingsmanager.h"
 #include <QDebug>
 
 ClipboardSettingsPanel::ClipboardSettingsPanel(QWidget* parent)
@@ -49,6 +50,12 @@ void ClipboardSettingsPanel::setupUI() {
 
     m_autoStartCheck = new QCheckBox("启动时自动开始监控", this);
     m_autoStartCheck->setStyleSheet("QCheckBox { color: #2c3e50; }");
+    
+    bool savedAutoStart = SettingsManager::instance()->clipboardAutoStart();
+    m_autoStartCheck->setChecked(savedAutoStart);
+    
+    connect(m_autoStartCheck, &QCheckBox::toggled, this, &ClipboardSettingsPanel::onAutoStartChanged);
+    
     groupLayout->addWidget(m_autoStartCheck);
 
     mainLayout->addWidget(settingsGroup);
@@ -102,5 +109,7 @@ void ClipboardSettingsPanel::onMaxItemsChanged(int value) {
 }
 
 void ClipboardSettingsPanel::onAutoStartChanged(bool checked) {
-    qDebug() << "自动启动监控改为:" << checked;
+    qDebug() << "剪贴板自动启动监控改为:" << (checked ? "启用" : "禁用");
+    
+    SettingsManager::instance()->setClipboardAutoStart(checked);
 }

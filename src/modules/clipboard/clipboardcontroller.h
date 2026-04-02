@@ -18,6 +18,7 @@ public:
     void showManager();
     void hideManager();
     bool isManagerVisible() const;
+    void startMonitoring();
 
 signals:
     void activated();

@@ -1,4 +1,5 @@
 #include "clipboardcontroller.h"
+#include "clipboardmanager.h"
 #include <QDebug>
 
 ClipboardController::ClipboardController(QObject* parent)
@@ -65,4 +66,12 @@ void ClipboardController::onManagerCloseRequested() {
     qDebug() << "剪贴板窗口关闭请求";
     hideManager();
     emit deactivated();
+}
+
+void ClipboardController::startMonitoring() {
+    qDebug() << "启动剪贴板监控";
+    ClipboardManager* manager = ClipboardManager::instance(this);
+    if (manager) {
+        manager->startMonitoring();
+    }
 }

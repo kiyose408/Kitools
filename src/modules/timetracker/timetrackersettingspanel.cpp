@@ -1,6 +1,7 @@
 #include "timetrackersettingspanel.h"
 #include "windowmonitor.h"
 #include "activitymanager.h"
+#include "modules/timer/settingsmanager.h"
 #include <QDebug>
 #include <QMessageBox>
 #include <QCalendarWidget>
@@ -250,6 +251,15 @@ void TimeTrackerSettingsPanel::setupTrackingTab() {
     statusLayout->addLayout(intervalLayout);
     
     m_autoStartCheck = new QCheckBox("开机自动启动追踪", statusGroup);
+    
+    bool savedAutoStart = SettingsManager::instance()->timeTrackerAutoStart();
+    m_autoStartCheck->setChecked(savedAutoStart);
+    
+    connect(m_autoStartCheck, &QCheckBox::toggled, this, [this](bool checked) {
+        qDebug() << "时间追踪器自动启动改为:" << (checked ? "启用" : "禁用");
+        SettingsManager::instance()->setTimeTrackerAutoStart(checked);
+    });
+    
     statusLayout->addWidget(m_autoStartCheck);
     
     layout->addWidget(statusGroup);

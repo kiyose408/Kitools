@@ -155,6 +155,36 @@ void SettingsManager::setFlashEnabled(bool enabled)
     m_settings->setValue("alert/flashEnabled", enabled);
 }
 
+bool SettingsManager::autoStartEnabled() const
+{
+    return m_settings->value("autostart/enabled", false).toBool();
+}
+
+void SettingsManager::setAutoStartEnabled(bool enabled)
+{
+    m_settings->setValue("autostart/enabled", enabled);
+}
+
+bool SettingsManager::clipboardAutoStart() const
+{
+    return m_settings->value("autostart/clipboardAutoStart", true).toBool();
+}
+
+void SettingsManager::setClipboardAutoStart(bool enabled)
+{
+    m_settings->setValue("autostart/clipboardAutoStart", enabled);
+}
+
+bool SettingsManager::timeTrackerAutoStart() const
+{
+    return m_settings->value("autostart/timeTrackerAutoStart", true).toBool();
+}
+
+void SettingsManager::setTimeTrackerAutoStart(bool enabled)
+{
+    m_settings->setValue("autostart/timeTrackerAutoStart", enabled);
+}
+
 void SettingsManager::saveAll()
 {
     m_settings->sync();

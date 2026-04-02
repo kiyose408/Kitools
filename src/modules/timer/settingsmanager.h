@@ -44,6 +44,15 @@ public:
     void setSoundEnabled(bool enabled);
     void setFlashEnabled(bool enabled);
 
+    bool autoStartEnabled() const;
+    void setAutoStartEnabled(bool enabled);
+
+    bool clipboardAutoStart() const;
+    void setClipboardAutoStart(bool enabled);
+
+    bool timeTrackerAutoStart() const;
+    void setTimeTrackerAutoStart(bool enabled);
+
     void saveAll();
 
 private:

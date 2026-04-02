@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "modules/timer/timercontroller.h"
 #include "modules/timer/timersettingspanel.h"
+#include "modules/timer/settingsmanager.h"
+#include "core/autostartmanager.h"
 #include "modules/todo/todocontroller.h"
 #include "modules/todo/todosettingspanel.h"
 #include "modules/notes/notescontroller.h"
@@ -16,6 +18,7 @@
 #include <QApplication>
 #include <QStyle>
 #include <QDebug>
+#include <QHBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -43,11 +46,14 @@ MainWindow::MainWindow(QWidget *parent)
     , m_trayMenu(nullptr)
     , m_showAction(nullptr)
     , m_quitAction(nullptr)
+    , m_autoStartCheckBox(nullptr)
     , m_forceQuit(false)
 {
     setupUi();
     setupConnections();
     setupTrayIcon();
+    
+    initializeAutoStartModules();
 }
 
 MainWindow::~MainWindow()
@@ -200,6 +206,48 @@ void MainWindow::setupUi()
     m_timeTrackerModuleBtn->setCursor(Qt::PointingHandCursor);
     homeLayout->addWidget(m_timeTrackerModuleBtn);
 
+    homeLayout->addSpacing(20);
+
+    QFrame *separatorLine = new QFrame(this);
+    separatorLine->setFrameShape(QFrame::HLine);
+    separatorLine->setStyleSheet("background-color: #bdc3c7;");
+    homeLayout->addWidget(separatorLine);
+
+    homeLayout->addSpacing(10);
+
+    QWidget *autoStartWidget = new QWidget(this);
+    QHBoxLayout *autoStartLayout = new QHBoxLayout(autoStartWidget);
+    autoStartLayout->setContentsMargins(0, 0, 0, 0);
+
+    QLabel *autoStartLabel = new QLabel("🚀 开机自动启动", autoStartWidget);
+    autoStartLabel->setStyleSheet("font-size: 14px; color: #2c3e50; font-weight: bold;");
+    autoStartLayout->addWidget(autoStartLabel);
+
+    autoStartLayout->addStretch();
+
+    m_autoStartCheckBox = new QCheckBox(autoStartWidget);
+    m_autoStartCheckBox->setStyleSheet(
+        "QCheckBox {"
+        "  font-size: 14px;"
+        "}"
+        "QCheckBox::indicator {"
+        "  width: 18px;"
+        "  height: 18px;"
+        "  border-radius: 9px;"
+        "  border: 2px solid #95a5a6;"
+        "  background-color: white;"
+        "}"
+        "QCheckBox::indicator:checked {"
+        "  background-color: #27ae60;"
+        "  border-color: #27ae60;"
+        "}"
+    );
+    bool savedAutoStart = SettingsManager::instance()->autoStartEnabled();
+    m_autoStartCheckBox->setChecked(savedAutoStart);
+    autoStartLayout->addWidget(m_autoStartCheckBox);
+
+    homeLayout->addWidget(autoStartWidget);
+
     m_notesController = new NotesController(this);
     m_notesPanel = m_notesController->settingsPanel();
     m_stackedWidget->addWidget(m_notesPanel);
@@ -241,6 +289,9 @@ void MainWindow::setupConnections()
     connect(m_launcherModuleBtn, &QPushButton::clicked, this, &MainWindow::onLauncherModuleClicked);
     connect(m_timeTrackerModuleBtn, &QPushButton::clicked, this, &MainWindow::onTimeTrackerModuleClicked);
     qDebug() << "Button connections done.";
+
+    connect(m_autoStartCheckBox, &QCheckBox::stateChanged, this, &MainWindow::onAutoStartChanged);
+    qDebug() << "Auto start checkbox connected.";
 
     TimerSettingsPanel *timerPanel = qobject_cast<TimerSettingsPanel*>(m_timerPanel);
     if (timerPanel) {
@@ -419,4 +470,47 @@ void MainWindow::onQuitApplication()
     }
     
     QApplication::quit();
+}
+
+void MainWindow::onAutoStartChanged(int state)
+{
+    bool enabled = (state == Qt::Checked);
+    
+    qDebug() << "自启动选项变更:" << (enabled ? "启用" : "禁用");
+    
+    SettingsManager::instance()->setAutoStartEnabled(enabled);
+    AutoStartManager::instance()->setAutoStartEnabled(enabled);
+    
+    QString message = enabled ? "已设置开机自动启动，应用将在系统启动时自动运行。" 
+                              : "已取消开机自启动，需要手动启动应用。";
+    
+    if (m_trayIcon) {
+        m_trayIcon->showMessage(
+            "PC效率工具箱",
+            message,
+            QSystemTrayIcon::Information,
+            2000
+        );
+    }
+}
+
+void MainWindow::initializeAutoStartModules()
+{
+    qDebug() << "初始化模块自启动状态...";
+    
+    bool clipboardAutoStart = SettingsManager::instance()->clipboardAutoStart();
+    bool timeTrackerAutoStart = SettingsManager::instance()->timeTrackerAutoStart();
+    
+    qDebug() << "剪贴板自动启动:" << clipboardAutoStart;
+    qDebug() << "时间追踪器自动启动:" << timeTrackerAutoStart;
+    
+    if (clipboardAutoStart && m_clipboardController) {
+        qDebug() << "自动启动剪贴板监控...";
+        m_clipboardController->startMonitoring();
+    }
+    
+    if (timeTrackerAutoStart && m_timeTrackerController) {
+        qDebug() << "自动启动时间追踪器...";
+        m_timeTrackerController->startTracking();
+    }
 }

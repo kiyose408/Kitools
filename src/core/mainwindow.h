@@ -8,6 +8,7 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QCloseEvent>
+#include <QCheckBox>
 
 class TimerController;
 class TodoController;
@@ -39,12 +40,14 @@ private slots:
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
     void onShowWindow();
     void onQuitApplication();
+    void onAutoStartChanged(int state);
 
 private:
     void setupUi();
     void setupConnections();
     void setupTrayIcon();
     void createTrayMenu();
+    void initializeAutoStartModules();
 
     QWidget *m_homeWidget;
     QStackedWidget *m_stackedWidget;
@@ -77,6 +80,8 @@ private:
     QMenu *m_trayMenu;
     QAction *m_showAction;
     QAction *m_quitAction;
+
+    QCheckBox *m_autoStartCheckBox;
     
     bool m_forceQuit;
 };

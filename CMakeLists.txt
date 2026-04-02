@@ -83,6 +83,8 @@ set(SOURCES
     src/modules/timetracker/timetrackercontroller.h
     src/modules/timetracker/timetrackersettingspanel.cpp
     src/modules/timetracker/timetrackersettingspanel.h
+    src/core/autostartmanager.cpp
+    src/core/autostartmanager.h
 )
 
 set(HEADERS
@@ -121,6 +123,7 @@ set(HEADERS
     src/modules/timetracker/activitymanager.h
     src/modules/timetracker/timetrackercontroller.h
     src/modules/timetracker/timetrackersettingspanel.h
+    src/core/autostartmanager.h
 )
 
 set(RESOURCES
