@@ -1,6 +1,6 @@
 # PC效率工具箱 (PC Productivity Toolbox)
 
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/your-repo/kitools)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/your-repo/kitools)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey.svg)](https://www.microsoft.com/windows)
 [![Qt](https://img.shields.io/badge/Qt-6.9.0-green.svg)](https://www.qt.io)
 [![C++](https://img.shields.io/badge/C%2B%2B-17-orange.svg)](https://isocpp.org/)
@@ -33,12 +33,30 @@
 - 多类型支持（文本、图片、文件路径、网页内容）
 - 搜索、收藏、分类筛选
 - 数据持久化存储
+- **开机自动启动监控**（可选）
 
 ### 快捷启动器
 - 全盘应用索引（开始菜单、桌面、Program Files等）
 - 分类筛选（全部/常用/最近/固定/系统/开发/办公/网络/媒体）
 - 快速搜索启动
 - 使用频率统计与智能排序
+
+### 时间追踪器 ⭐ NEW
+- Windows API窗口活动监控（低资源占用）
+- 应用使用时间自动记录和统计
+- 智能应用分类系统（8大类别：开发/浏览器/办公/通讯/媒体/游戏/系统/其他）
+- 浏览器标签页智能分类（工作/学习/社交/视频/购物/新闻）
+- 自定义分类规则管理（支持编辑默认规则）
+- 今日/历史数据查看和统计分析
+- 每日目标设定与进度跟踪
+- **开机自动启动追踪**（可选）
+
+### 开机自启动系统 🚀 NEW
+- 全局应用自启动开关（主界面首页）
+- 剪贴板模块独立自启动控制
+- 时间追踪器模块独立自启动控制
+- Windows注册表自启动管理
+- 配置持久化保存，重启不丢失
 
 ### 系统托盘集成
 - 最小化到托盘后台运行
@@ -65,13 +83,15 @@ kitools/
 │   ├── main.cpp                 # 程序入口
 │   ├── core/                    # 核心框架
 │   │   ├── mainwindow.h/cpp     # 主窗口
-│   │   └── globalshortcutmanager.h/cpp  # 全局快捷键
+│   │   ├── globalshortcutmanager.h/cpp  # 全局快捷键
+│   │   └── autostartmanager.h/cpp      # 自启动管理器
 │   └── modules/                 # 功能模块
 │       ├── timer/               # 计时器模块
 │       ├── todo/                # 待办事项模块
 │       ├── notes/               # 便签模块
 │       ├── clipboard/           # 剪贴板模块
-│       └── launcher/            # 快捷启动器模块
+│       ├── launcher/            # 快捷启动器模块
+│       └── timetracker/         # 时间追踪器模块 ⭐
 ├── docs/                        # 文档目录
 └── CMakeLists.txt               # 构建配置
 ```
@@ -104,17 +124,19 @@ kitools/
 | v1.1.0 | 2025-03-15 | 桌面便签模块 |
 | v1.2.0 | 2025-03-16 | 剪贴板历史管理模块 |
 | v1.3.0 | 2025-03-19 | 快捷启动器模块、全局快捷键管理器 |
+| v1.4.0 | 2026-04-03 | 时间追踪器模块、开机自启动系统、浏览器智能分类 |
 
 ---
 
 ## 未来规划
 
-### 短期规划（v1.4.0）
+### 短期规划（v1.5.0）
 - 全局快捷键 Alt+Space 快速呼出启动器
 - 剪贴板快捷键快速粘贴
+- 时间追踪器效率报告生成（PDF/HTML导出）
+- 统计图表可视化（饼图/时间线/排行榜）
 
 ### 中期规划（v1.5.0 - v1.6.0）
-- 时间追踪器：自动追踪应用使用时间，生成效率报告
 - 习惯养成打卡：习惯打卡与追踪
 - 专注模式增强：屏蔽干扰网站和应用
 

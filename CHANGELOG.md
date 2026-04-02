@@ -1,5 +1,66 @@
 # 更新日志
 
+## [v1.4.0] - 2026-04-03
+
+### 新增功能
+- **时间追踪器模块**
+  - Windows API窗口活动监控（GetForegroundWindow等）
+  - 应用使用时间自动记录和统计
+  - 智能应用分类系统（开发/浏览器/办公/通讯/媒体/游戏/系统/其他）
+  - 浏览器标签页智能分类（工作/学习/社交/视频/购物/新闻）
+  - 自定义分类规则管理（支持编辑默认规则）
+  - 今日/历史数据查看和统计分析
+  - 每日目标设定与进度跟踪
+
+- **开机自启动功能**
+  - 全局应用自启动开关（主界面首页）
+  - Windows注册表自启动管理（HKEY_CURRENT_USER）
+  - 剪贴板模块独立自启动选项
+  - 时间追踪器模块独立自启动选项
+  - 配置持久化保存（QSettings）
+  - 用户选择状态跨会话保持
+
+- **AutoStartManager核心组件**
+  - 单例模式注册表管理器
+  - 跨平台预留接口（Q_OS_WIN宏控制）
+  - 完善的错误处理和日志输出
+  - 状态变更信号通知机制
+
+### 改进
+- **游戏识别优化**：扩展游戏分类规则库
+  - 新增：三角洲(Delta Force)、原神、永劫无间、PUBG、Apex等热门游戏
+  - 新增：Steam、Epic、WeGame等游戏平台支持
+- **浏览器分类增强**：
+  - 窗口标题自动解析（域名+页面标题提取）
+  - URL匹配规则和关键词匹配双重机制
+  - 6大浏览器子分类覆盖主流网站
+- **规则编辑功能完善**：
+  - 支持编辑预设/默认分类规则
+  - 多行文本输入批量添加进程名
+  - 规则名称重复检测与确认提示
+
+### 技术改进
+- SettingsManager扩展：新增6个自启动配置接口
+- MainWindow增强：initializeAutoStartModules()自动初始化
+- ClipboardController新增startMonitoring()方法
+- CMakeLists.txt更新：添加autostartmanager源文件
+- Windows API集成：psapi库链接配置
+
+### 文件变更清单
+**新建文件 (2个)**：
+- `src/core/autostartmanager.h` - 注册表管理器头文件
+- `src/core/autostartmanager.cpp` - Windows API实现
+
+**修改文件 (9个)**：
+- `src/modules/timer/settingsmanager.h/cpp` - +6个方法
+- `src/core/mainwindow.h/cpp` - +80行UI和逻辑
+- `src/modules/clipboard/clipboardcontroller.h/cpp` - +8行
+- `src/modules/clipboard/clipboardsettingspanel.cpp` - +7行
+- `src/modules/timetracker/timetrackersettingspanel.cpp` - +10行
+- `CMakeLists.txt` - +3行源文件
+
+---
+
 ## [v1.3.0] - 2025-03-19
 
 ### 新增功能
