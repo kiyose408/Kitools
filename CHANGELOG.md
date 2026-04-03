@@ -1,5 +1,32 @@
 # 更新日志
 
+## [v1.4.1] - 2026-04-04
+
+### Bug修复
+- **全屏游戏跟踪问题修复**
+  - 修复部分全屏游戏无法被时间追踪器正确识别的问题
+  - 增强进程信息获取：添加备用权限尝试（PROCESS_QUERY_LIMITED_INFORMATION）
+  - 添加备用API：QueryFullProcessImageNameW作为GetModuleBaseNameW的备用方案
+  - 进程名获取失败时返回PID标识，确保始终有追踪标识
+  - 窗口标题为空时使用窗口类名作为备用标识
+  - 提高了对带反作弊系统的游戏的兼容性
+
+### 改进
+- **浏览器分类逻辑优化**
+  - 改进域名匹配逻辑，支持子页面正确分类
+  - 添加中文站点名称识别（如"哔哩哔哩"、"B站"等）
+  - 优化关键词匹配机制
+
+### API更新
+- 更新Qt 6.9弃用API：QCheckBox::stateChanged → checkStateChanged
+- 函数签名更新：onAutoStartChanged(int) → onAutoStartChanged(Qt::CheckState)
+
+### 技术细节
+- windowmonitor.cpp：增强getProcessName/getProcessPath/getWindowTitle函数
+- mainwindow.cpp/h：更新自启动复选框信号连接
+
+---
+
 ## [v1.4.0] - 2026-04-03
 
 ### 新增功能
