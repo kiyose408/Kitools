@@ -157,15 +157,25 @@ WindowInfo WindowMonitor::getForegroundWindowInfo() {
 QString WindowMonitor::getWindowTitle(HWND hwnd) {
 #ifdef Q_OS_WIN
     int length = GetWindowTextLengthW(hwnd);
-    if (length <= 0) {
-        return QString();
+    if (length > 0) {
+        wchar_t* buffer = new wchar_t[length + 1];
+        GetWindowTextW(hwnd, buffer, length + 1);
+        QString title = QString::fromWCharArray(buffer);
+        delete[] buffer;
+        if (!title.isEmpty()) {
+            return title;
+        }
     }
     
-    wchar_t* buffer = new wchar_t[length + 1];
-    GetWindowTextW(hwnd, buffer, length + 1);
-    QString title = QString::fromWCharArray(buffer);
-    delete[] buffer;
-    return title;
+    wchar_t className[256];
+    if (GetClassNameW(hwnd, className, 256) > 0) {
+        QString classNameStr = QString::fromWCharArray(className);
+        qDebug() << "窗口标题为空，使用类名:" << classNameStr;
+        return QString("[Window] %1").arg(classNameStr);
+    }
+    
+    qDebug() << "无法获取窗口标题或类名";
+    return QString("[Unknown Window]");
 #else
     Q_UNUSED(hwnd);
     return QString();
@@ -176,8 +186,12 @@ QString WindowMonitor::getProcessName(DWORD processId) {
 #ifdef Q_OS_WIN
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId);
     if (!hProcess) {
+        hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, processId);
+    }
+    
+    if (!hProcess) {
         qDebug() << "打开进程失败，PID:" << processId << "错误码:" << GetLastError();
-        return QString();
+        return QString("PID_%1").arg(processId);
     }
     
     wchar_t processName[MAX_PATH];
@@ -186,9 +200,20 @@ QString WindowMonitor::getProcessName(DWORD processId) {
         return QString::fromWCharArray(processName);
     }
     
+    DWORD size = MAX_PATH;
+    if (QueryFullProcessImageNameW(hProcess, 0, processName, &size)) {
+        CloseHandle(hProcess);
+        QString fullPath = QString::fromWCharArray(processName);
+        int lastSlash = fullPath.lastIndexOf('\\');
+        if (lastSlash >= 0) {
+            return fullPath.mid(lastSlash + 1);
+        }
+        return fullPath;
+    }
+    
     qDebug() << "获取进程名失败，PID:" << processId << "错误码:" << GetLastError();
     CloseHandle(hProcess);
-    return QString();
+    return QString("PID_%1").arg(processId);
 #else
     Q_UNUSED(processId);
     return QString();
@@ -199,6 +224,11 @@ QString WindowMonitor::getProcessPath(DWORD processId) {
 #ifdef Q_OS_WIN
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId);
     if (!hProcess) {
+        hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, processId);
+    }
+    
+    if (!hProcess) {
+        qDebug() << "获取进程路径失败，PID:" << processId << "错误码:" << GetLastError();
         return QString();
     }
     
@@ -208,6 +238,13 @@ QString WindowMonitor::getProcessPath(DWORD processId) {
         return QString::fromWCharArray(processPath);
     }
     
+    DWORD size = MAX_PATH;
+    if (QueryFullProcessImageNameW(hProcess, 0, processPath, &size)) {
+        CloseHandle(hProcess);
+        return QString::fromWCharArray(processPath);
+    }
+    
+    qDebug() << "获取进程路径失败，PID:" << processId << "错误码:" << GetLastError();
     CloseHandle(hProcess);
     return QString();
 #else
