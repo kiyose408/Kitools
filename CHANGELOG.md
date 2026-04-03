@@ -46,6 +46,31 @@
 - CMakeLists.txt更新：添加autostartmanager源文件
 - Windows API集成：psapi库链接配置
 
+### 打包与发布
+- **自动化打包脚本**
+  - PowerShell打包脚本（package_simple.ps1）
+  - 自动查找Release构建产物
+  - windeployqt自动部署Qt依赖库
+  - 手动补充关键DLL（Qt6Charts等）
+  - MinGW运行时库完整部署
+  - 依赖完整性验证机制
+
+- **NSIS安装程序**
+  - Modern UI 2界面（简体中文）
+  - 完整安装向导（欢迎/许可/目录/进度/完成）
+  - 桌面和开始菜单快捷方式创建
+  - 控制面板注册（程序和功能）
+  - 标准卸载流程支持
+  - 文件版本信息嵌入
+
+- **发布包内容**
+  - ZIP便携版（16.07 MB）：解压即用
+  - NSIS安装版（16.13 MB）：标准安装体验
+  - 完整Qt运行时：Qt6Core/Gui/Widgets/Network/Svg/Charts等
+  - Qt插件：platforms/imageformats/styles/tls等
+  - MinGW运行时：libgcc_s_seh-1/libstdc++-6/libwinpthread-1
+  - 项目文档：README/CHANGELOG/LICENSE/docs目录
+
 ### 文件变更清单
 **新建文件 (2个)**：
 - `src/core/autostartmanager.h` - 注册表管理器头文件

@@ -149,20 +149,57 @@ kitools/
 
 ## 快速开始
 
-### 环境要求
-- Windows 10/11 (64位)
-- Qt 6.9.0 或更高版本
-- CMake 3.16+
-- C++17 兼容编译器
+### 方式一：使用安装程序（推荐）
 
-### 构建步骤
+1. 下载最新的安装程序：`PCProductivityToolbox_v1.4.0_Setup.exe`
+2. 双击运行安装程序
+3. 按照安装向导完成安装
+4. 安装完成后可从桌面或开始菜单启动
+
+**安装程序特性：**
+- 自动创建桌面快捷方式
+- 自动创建开始菜单文件夹
+- 注册到控制面板（支持卸载）
+- 完整的Qt运行时环境
+
+### 方式二：使用便携版
+
+1. 下载ZIP压缩包：`PCProductivityToolbox_v1.4.0.zip`
+2. 解压到任意目录
+3. 双击运行 `PCProductivityToolbox.exe`
+
+**便携版特性：**
+- 无需安装，解压即用
+- 可放在U盘随身携带
+- 不写入注册表
+
+### 从源码构建
+
+#### 环境要求
+- Windows 10/11 (64位)
+- Qt 6.9.3 或更高版本
+- CMake 3.16+
+- MinGW 64-bit 或 MSVC 2022
+
+#### 构建步骤
 
 ```bash
+# 克隆仓库
 git clone https://github.com/your-repo/kitools.git
 cd kitools
+
+# 创建构建目录
 mkdir build && cd build
-cmake ..
+
+# 配置项目
+cmake .. -DCMAKE_BUILD_TYPE=Release
+
+# 编译
 cmake --build . --config Release
+
+# 打包（可选）
+# 运行项目根目录下的 package_simple.ps1
+powershell -ExecutionPolicy Bypass -File ../package_simple.ps1
 ```
 
 ---
