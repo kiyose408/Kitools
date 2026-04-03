@@ -40,7 +40,7 @@ private slots:
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
     void onShowWindow();
     void onQuitApplication();
-    void onAutoStartChanged(int state);
+    void onAutoStartChanged(Qt::CheckState state);
 
 private:
     void setupUi();

@@ -290,7 +290,7 @@ void MainWindow::setupConnections()
     connect(m_timeTrackerModuleBtn, &QPushButton::clicked, this, &MainWindow::onTimeTrackerModuleClicked);
     qDebug() << "Button connections done.";
 
-    connect(m_autoStartCheckBox, &QCheckBox::stateChanged, this, &MainWindow::onAutoStartChanged);
+    connect(m_autoStartCheckBox, &QCheckBox::checkStateChanged, this, &MainWindow::onAutoStartChanged);
     qDebug() << "Auto start checkbox connected.";
 
     TimerSettingsPanel *timerPanel = qobject_cast<TimerSettingsPanel*>(m_timerPanel);
@@ -472,7 +472,7 @@ void MainWindow::onQuitApplication()
     QApplication::quit();
 }
 
-void MainWindow::onAutoStartChanged(int state)
+void MainWindow::onAutoStartChanged(Qt::CheckState state)
 {
     bool enabled = (state == Qt::Checked);
     
