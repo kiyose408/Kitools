@@ -257,7 +257,7 @@ void ActivityManager::initDefaultCategoryRules() {
     devRule.processPatterns = QStringList{
         "code", "qtcreator", "clion", "idea", "pycharm", "vscode", 
         "devenv", "android studio", "eclipse", "netbeans",
-        "git", "svn", "mercurial", "cmake", "make", "mingw"
+        "git", "svn", "mercurial", "cmake", "make", "mingw","trae"
     };
     m_categoryRules[devRule.name] = devRule;
     
@@ -266,7 +266,7 @@ void ActivityManager::initDefaultCategoryRules() {
     browserRule.category = ActivityCategory::Browser;
     browserRule.processPatterns = QStringList{
         "chrome", "firefox", "edge", "msedge", "safari", 
-        "opera", "browser", "360se", "qqbrowser", "sogouexplorer"
+        "opera", "browser", "360se", "qqbrowser", "sogouexplorer", "quark"
     };
     m_categoryRules[browserRule.name] = browserRule;
     
@@ -276,7 +276,7 @@ void ActivityManager::initDefaultCategoryRules() {
     officeRule.processPatterns = QStringList{
         "winword", "excel", "powerpnt", "outlook", "onenote",
         "wps", "et", "wpp", "notepad", "wordpad",
-        "acrobat", "foxitreader", "sumatrapdf"
+        "acrobat", "foxitreader", "sumatrapdf", "obsidian"
     };
     m_categoryRules[officeRule.name] = officeRule;
     
@@ -286,7 +286,7 @@ void ActivityManager::initDefaultCategoryRules() {
     commRule.processPatterns = QStringList{
         "wechat", "qq", "tim", "dingtalk", "telegram",
         "discord", "slack", "teams", "skype", "zoom",
-        "微信", "钉钉", "飞书"
+        "微信", "钉钉", "飞书","kook"
     };
     m_categoryRules[commRule.name] = commRule;
     
@@ -296,7 +296,7 @@ void ActivityManager::initDefaultCategoryRules() {
     mediaRule.processPatterns = QStringList{
         "vlc", "potplayer", "kmplayer", "foobar2000", "aimp",
         "netease", "cloudmusic", "qqmusic", "spotify",
-        "photoshop", "lightroom", "premiere", "aftereffects"
+        "photoshop", "lightroom", "premiere", "aftereffects", "obs"
     };
     m_categoryRules[mediaRule.name] = mediaRule;
     
@@ -317,7 +317,8 @@ void ActivityManager::initDefaultCategoryRules() {
         "crossfire", "穿越火线",
         "dnf", "地下城",
         "cf", "csol",
-        "游戏", "game"
+        "游戏", "game",
+        "洛克王国"
     };
     m_categoryRules[gameRule.name] = gameRule;
     
@@ -347,7 +348,8 @@ void ActivityManager::initDefaultBrowserRules() {
         "npmjs.com", "pypi.org",
         "jira.", "confluence.",
         "notion.so", "figma.com",
-        "office.com", "docs.google.com"
+        "office.com", "docs.google.com",
+        "gitee.com"
     };
     workRule.keywords = QStringList{"文档", "API", "开发", "代码", "编程"};
     m_browserRules[workRule.name] = workRule;
@@ -386,9 +388,9 @@ void ActivityManager::initDefaultBrowserRules() {
         "bilibili.com", "b23.tv",
         "youku.com", "iqiyi.com",
         "v.qq.com", "tv.sohu.com",
-        "netflix.com", "disneyplus.com"
+        "netflix.com", "disneyplus.com", "douyin.com"
     };
-    videoRule.keywords = QStringList{"视频", "电影", "电视剧", "动漫", "综艺"};
+    videoRule.keywords = QStringList{"视频", "电影", "电视剧", "动漫", "综艺", "直播"};
     m_browserRules[videoRule.name] = videoRule;
     
     BrowserCategoryRule shoppingRule;
@@ -446,7 +448,7 @@ void ActivityManager::parseBrowserTitle(const QString& windowTitle, QString& dom
     QString remaining = windowTitle;
     QString browserSuffix;
     
-    QStringList browserNames = {"Google Chrome", "Mozilla Firefox", "Microsoft Edge", "Opera", "Safari", "360浏览器", "QQ浏览器", "搜狗浏览器"};
+    QStringList browserNames = {"Google Chrome", "Mozilla Firefox", "Microsoft Edge", "Opera", "Safari", "360浏览器", "QQ浏览器", "搜狗浏览器", "quark", "夸克"};
     for (const QString& browser : browserNames) {
         if (remaining.endsWith(browser)) {
             browserSuffix = browser;
