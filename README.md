@@ -1,6 +1,6 @@
 # PC效率工具箱 (PC Productivity Toolbox)
 
-[![Version](https://img.shields.io/badge/version-1.4.1-blue.svg)](https://github.com/your-repo/kitools)
+[![Version](https://img.shields.io/badge/version-1.4.2-blue.svg)](https://github.com/your-repo/kitools)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey.svg)](https://www.microsoft.com/windows)
 [![Qt](https://img.shields.io/badge/Qt-6.9.0-green.svg)](https://www.qt.io)
 [![C++](https://img.shields.io/badge/C%2B%2B-17-orange.svg)](https://isocpp.org/)
@@ -126,6 +126,7 @@ kitools/
 | v1.3.0 | 2025-03-19 | 快捷启动器模块、全局快捷键管理器 |
 | v1.4.0 | 2026-04-03 | 时间追踪器模块、开机自启动系统、浏览器智能分类 |
 | v1.4.1 | 2026-04-04 | 全屏游戏跟踪修复、浏览器分类优化 |
+| v1.4.2 | 2026-04-04 | B站/抖音分类修复、调试输出优化、性能提升 |
 
 ---
 

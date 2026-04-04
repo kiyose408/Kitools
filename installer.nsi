@@ -1,5 +1,5 @@
 !define PRODUCT_NAME "PC效率工具箱"
-!define PRODUCT_VERSION "1.4.1"
+!define PRODUCT_VERSION "1.4.2"
 !define PRODUCT_PUBLISHER "Kitools Team"
 !define PRODUCT_WEB_SITE "https://gitee.com/kitools"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -44,7 +44,7 @@ InstallDir "$PROGRAMFILES64\PCProductivityToolbox"
 RequestExecutionLevel admin
 
 ; Version info
-VIProductVersion "1.4.1.0"
+VIProductVersion "1.4.2.0"
 VIAddVersionKey "ProductName" "${PRODUCT_NAME}"
 VIAddVersionKey "Comments" "A modular productivity tool collection for Windows desktop users"
 VIAddVersionKey "CompanyName" "${PRODUCT_PUBLISHER}"
