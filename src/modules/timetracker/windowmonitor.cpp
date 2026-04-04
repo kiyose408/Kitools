@@ -82,15 +82,16 @@ WindowInfo WindowMonitor::getActiveWindow() {
 void WindowMonitor::onTimerTick() {
     WindowInfo newWindow = getForegroundWindowInfo();
     
-    qDebug() << "----------------------------------------";
-    qDebug() << "定时器触发 - 检查窗口变化";
-    qDebug() << "当前窗口:" << m_currentWindow.processName << "-" << m_currentWindow.windowTitle;
-    qDebug() << "新窗口:" << newWindow.processName << "-" << newWindow.windowTitle;
+    bool processChanged = (newWindow.processName != m_currentWindow.processName);
+    bool titleChanged = (newWindow.windowTitle != m_currentWindow.windowTitle);
     
-    if (newWindow.processName != m_currentWindow.processName ||
-        newWindow.windowTitle != m_currentWindow.windowTitle) {
+    if (processChanged || titleChanged) {
+        qDebug() << "";
+        qDebug() << "==== 窗口切换 ====";
         
-        qDebug() << ">>> 检测到窗口变化! <<<";
+        if (processChanged) {
+            qDebug() << "进程:" << m_currentWindow.processName << "->" << newWindow.processName;
+        }
         
         if (!m_currentWindow.processName.isEmpty()) {
             ActivityRecord record;
@@ -101,26 +102,18 @@ void WindowMonitor::onTimerTick() {
             record.endTime = QDateTime::currentDateTime();
             record.durationSeconds = m_windowStartTime.secsTo(record.endTime);
             
-            qDebug() << "生成活动记录:";
-            qDebug() << "  进程:" << record.processName;
-            qDebug() << "  标题:" << record.windowTitle;
-            qDebug() << "  开始时间:" << record.startTime.toString("yyyy-MM-dd hh:mm:ss");
-            qDebug() << "  结束时间:" << record.endTime.toString("yyyy-MM-dd hh:mm:ss");
-            qDebug() << "  持续时间:" << record.durationSeconds << "秒";
-            
-            emit activityRecorded(record);
-            qDebug() << "activityRecorded 信号已发送";
+            if (record.durationSeconds >= 1) {
+                qDebug() << "记录:" << record.processName 
+                         << "| 时长:" << record.durationSeconds << "秒"
+                         << "| 标题:" << record.windowTitle.left(50);
+                emit activityRecorded(record);
+            }
         }
         
         emit windowChanged(m_currentWindow, newWindow);
-        qDebug() << "windowChanged 信号已发送";
         
         m_currentWindow = newWindow;
         m_windowStartTime = QDateTime::currentDateTime();
-        
-        qDebug() << "已更新当前窗口信息";
-    } else {
-        qDebug() << "窗口未变化，继续监控...";
     }
 }
 

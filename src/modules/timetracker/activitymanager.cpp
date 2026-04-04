@@ -420,25 +420,44 @@ void ActivityManager::initDefaultBrowserRules() {
     qDebug() << "已初始化" << m_browserRules.size() << "条浏览器分类规则";
 }
 
-BrowserSubCategory ActivityManager::categorizeBrowser(const QString& windowTitle) const {
+BrowserSubCategory ActivityManager::categorizeBrowser(const QString& windowTitle) const
+{
     QString titleLower = windowTitle.toLower();
+    
+    qDebug() << "=== 浏览器分类调试 ===";
+    qDebug() << "窗口标题:" << windowTitle;
     
     for (const BrowserCategoryRule& rule : m_browserRules) {
         for (const QString& domain : rule.domains) {
-            if (titleLower.contains(domain.toLower())) {
-                qDebug() << "浏览器标题匹配域名:" << domain << "->" << rule.name;
+            QString domainLower = domain.toLower();
+            if (titleLower.contains(domainLower)) {
+                qDebug() << "✓ 匹配域名:" << domain << "-> 分类:" << rule.name;
                 return rule.subCategory;
             }
         }
         
         for (const QString& keyword : rule.keywords) {
             if (titleLower.contains(keyword.toLower())) {
-                qDebug() << "浏览器标题匹配关键词:" << keyword << "->" << rule.name;
+                qDebug() << "✓ 匹配关键词:" << keyword << "-> 分类:" << rule.name;
                 return rule.subCategory;
             }
         }
     }
     
+    if (windowTitle.contains("哔哩哔哩") || windowTitle.contains("B站") || 
+        windowTitle.contains("bilibili", Qt::CaseInsensitive) || 
+        titleLower.contains("b23.tv")) {
+        qDebug() << "✓ 特殊匹配: B站相关 -> 分类: 视频娱乐";
+        return BrowserSubCategory::Video;
+    }
+    
+    if (windowTitle.contains("抖音") || titleLower.contains("douyin") || 
+        titleLower.contains("tiktok")) {
+        qDebug() << "✓ 特殊匹配: 抖音相关 -> 分类: 视频娱乐";
+        return BrowserSubCategory::Video;
+    }
+    
+    qDebug() << "✗ 未匹配到任何规则 -> 分类: 其他";
     return BrowserSubCategory::Other;
 }
 
